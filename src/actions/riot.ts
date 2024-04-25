@@ -34,7 +34,10 @@ export const accountV1 = async (_gameName: string, _tagLine: string) => {
 
   const AccountInfo: AccountDto | ResponseError = await response.json()
 
-  if ('status' in AccountInfo) throw new Error(AccountInfo.status.message)
+  if ('status' in AccountInfo)
+    return {
+      error: AccountInfo.status.message,
+    }
 
   return {
     riotPuuid: AccountInfo.puuid,
@@ -55,7 +58,10 @@ export const summonerV4 = async (riotPuuid: string) => {
 
   const SummonerInfo: SummonerDto | ResponseError = await response.json()
 
-  if ('status' in SummonerInfo) throw new Error(SummonerInfo.status.message)
+  if ('status' in SummonerInfo)
+    return {
+      error: SummonerInfo.status.message,
+    }
 
   return {
     riotPuuid: SummonerInfo.puuid,
