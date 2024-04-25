@@ -4,7 +4,7 @@ import { SlashCommand } from './types/SlashCommand'
 
 const { DISCORD_TOKEN } = process.env
 if (!DISCORD_TOKEN) {
-  throw new Error('Discord token is missing')
+  throw new Error('[ENV] DISCORD_TOKEN을 불러올 수 없습니다.')
 }
 
 const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits
