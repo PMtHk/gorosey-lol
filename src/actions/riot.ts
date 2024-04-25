@@ -60,7 +60,7 @@ export const summonerV4 = async (riotPuuid: string) => {
   return {
     riotPuuid: SummonerInfo.puuid,
     summonerId: SummonerInfo.id,
-    accountId: SummonerInfo.accoundId,
+    accountId: SummonerInfo.accountId,
     summonerName: SummonerInfo.name,
     summonerLevel: SummonerInfo.summonerLevel,
     revisionDate: SummonerInfo.revisionDate,

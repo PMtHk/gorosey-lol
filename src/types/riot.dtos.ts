@@ -13,7 +13,7 @@ export type AccountDto = {
 }
 
 export type SummonerDto = {
-  accoundId: string
+  accountId: string
   profileIconId: number
   revisionDate: number // Epoch
   name: string
