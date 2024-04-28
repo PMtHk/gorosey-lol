@@ -23,7 +23,7 @@ export const search: SlashCommand = {
       type: ApplicationCommandOptionType.String,
     },
   ],
-  execute: async (_, interaction) => {
+  execute: async (client, interaction) => {
     try {
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
@@ -92,7 +92,14 @@ export const search: SlashCommand = {
       // return 없을 시 강제 추방되는 경우 앱이 죽는 문제가 있음
       if (isRefreshDisabled) return
 
-      const collectorFilter = (i) => i.user.id === interaction.user.id
+      // 멤버목록 가져와서 버튼을 클릭이 가능하도록 필터링
+      const userGuilds = interaction.client.guilds.cache.get(
+        interaction.guildId,
+      ).members.cache
+
+      const memberIds = userGuilds.map((member) => member.user.id)
+
+      const collectorFilter = (i) => memberIds.includes(i.user.id)
 
       const userInteraction = await response.awaitMessageComponent({
         filter: collectorFilter,
