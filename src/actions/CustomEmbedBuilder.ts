@@ -1,10 +1,24 @@
 import { EmbedBuilder } from 'discord.js'
+import { Lane } from '../types/lol.types'
+import { champions } from '../constants/champions'
 
 export interface CustomEmbedData {
   gameName: string
   tagLine: string
   profileIconId: number
   lastUpdatedAt: Date
+  matchHistories: {
+    type: string
+    championName: string
+    kills: number
+    deaths: number
+    assists: number
+    win: boolean
+    position: Lane
+    totalMinionsKilled: number
+    visionScore: number
+    gameEndTimestamp: number
+  }[]
   RANKED_SOLO_5x5: {
     tier: string
     rank: string
@@ -29,7 +43,24 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
     lastUpdatedAt,
     RANKED_SOLO_5x5: solo,
     RANKED_FLEX_SR: flex,
+    matchHistories,
   } = data
+
+  // match history
+  const matchCount = matchHistories.length
+  let wins = 0
+  let historyString = ''
+
+  matchHistories.forEach((match) => {
+    if (match.win) wins++
+
+    const win = match.win ? '승리' : '패배'
+    const type = match.type === 'RANKED_SOLO_5x5' ? '개인/2인랭크' : '자유랭크'
+    const kda = `${match.kills}/${match.deaths}/${match.assists}`
+    const score = ((match.kills + match.assists) / match.deaths).toFixed(2)
+
+    historyString += `${win} \`|\` ${type} \`|\` ${champions[match.championName]} \`|\` ${kda} \`|\` ${score} 평점 \n`
+  })
 
   const SOLO =
     solo && solo.tier && solo.tier !== 'UNRANKED'
@@ -62,7 +93,14 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
       { name: '\n', value: '\n' },
     )
     .addFields(
-      { name: '24시간내 전적', value: '정보 없음' },
+      {
+        name: '최근 전적',
+        value: `\`${matchCount}전 ${wins}승 ${matchCount - wins}패\`\n`,
+      },
+      {
+        name: '대전 기록',
+        value: matchCount > 0 ? historyString : '최근 전적이 없습니다.',
+      },
       { name: '\n', value: '\n' },
     )
     .setFooter({

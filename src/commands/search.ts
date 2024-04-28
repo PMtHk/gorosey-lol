@@ -11,6 +11,7 @@ import CustomEmbedBuilder, {
 } from '../actions/CustomEmbedBuilder'
 import { updateSummoner } from '../actions/updateSummoner'
 import { BUTTON_REFRESH_TIME } from '../constants/refreshTime'
+import fetchMatchHistory from '../actions/fetchMatchHistory'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -23,21 +24,12 @@ export const search: SlashCommand = {
       type: ApplicationCommandOptionType.String,
     },
   ],
-  execute: async (client, interaction) => {
+  execute: async (_, interaction) => {
     try {
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
 
       const summoner = await fetchSummoner(inputGameName, inputTagLine)
-      const {
-        gameName,
-        tagLine,
-        profileIconId,
-        lastUpdatedAt,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        summonerId: { RANKED_SOLO_5x5, RANKED_FLEX_SR },
-      } = summoner
-
       if ('error' in summoner) {
         await interaction.editReply({
           embeds: [
@@ -51,6 +43,17 @@ export const search: SlashCommand = {
 
         return
       }
+      const {
+        _id: riotPuuid,
+        gameName,
+        tagLine,
+        profileIconId,
+        lastUpdatedAt,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        summonerId: { RANKED_SOLO_5x5, RANKED_FLEX_SR },
+      } = summoner
+
+      const matchHistories = await fetchMatchHistory(riotPuuid)
 
       const data: CustomEmbedData = {
         gameName,
@@ -59,6 +62,7 @@ export const search: SlashCommand = {
         lastUpdatedAt,
         RANKED_SOLO_5x5,
         RANKED_FLEX_SR,
+        matchHistories,
       }
 
       const embed = CustomEmbedBuilder(data)
@@ -130,6 +134,7 @@ export const search: SlashCommand = {
           lastUpdatedAt: updatedSummoner.lastUpdatedAt,
           RANKED_SOLO_5x5: updatedSummoner.summonerId.RANKED_SOLO_5x5,
           RANKED_FLEX_SR: updatedSummoner.summonerId.RANKED_FLEX_SR,
+          matchHistories,
         }
 
         const updatedEmbed = CustomEmbedBuilder(updatedData)
