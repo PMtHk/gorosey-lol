@@ -14,8 +14,7 @@ export const watchList: SlashCommand = {
       return `${idx + 1}. \` ${summoner} \``
     })
 
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.editReply({
       content:
         `워치리스트에 등록된 소환사 목록입니다.\n\n` +
         content.join('\n') +

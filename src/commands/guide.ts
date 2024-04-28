@@ -9,8 +9,7 @@ export const guide: SlashCommand = {
       return `${idx + 1}. \`/${command.name}\` : ${command.description} \n`
     })
 
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.editReply({
       content:
         '현재 고로시롤에서 사용 가능한 명령어는 다음과 같습니다.\n\n' +
         commandMessages.join('') +

@@ -15,8 +15,7 @@ export const withdraw: SlashCommand = {
   execute: async (_, interaction) => {
     const summoner = (interaction.options.get('소환사')?.value || '') as string
 
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.editReply({
       content: `\` ${summoner} \`님을 워치리스트에서 제거했습니다.`,
     })
 

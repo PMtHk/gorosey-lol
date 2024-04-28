@@ -39,7 +39,7 @@ export const search: SlashCommand = {
       } = summoner
 
       if ('error' in summoner) {
-        await interaction.reply({
+        await interaction.editReply({
           embeds: [
             {
               title: '존재하지 않는 소환사입니다.',
@@ -79,14 +79,18 @@ export const search: SlashCommand = {
         )
         .setDisabled(isRefreshDisabled)
 
-      const response = await interaction.reply({
-        embeds: [embed],
+      const response = await interaction.editReply({
+        embeds: [embed.toJSON()],
         components: [
           new ActionRowBuilder<ButtonBuilder>({
             components: [refreshButton],
           }),
         ],
       })
+
+      // 더 수행할 작업이 없으므로 return
+      // return 없을 시 강제 추방되는 경우 앱이 죽는 문제가 있음
+      if (isRefreshDisabled) return
 
       const collectorFilter = (i) => i.user.id === interaction.user.id
 
@@ -137,7 +141,10 @@ export const search: SlashCommand = {
           ],
         })
       }
+
+      return
     } catch (e) {
+      console.log(e)
       await interaction.editReply({
         embeds: [
           {
