@@ -36,7 +36,7 @@ const startBot = async () => {
       )
 
       if (currentCommand) {
-        await interaction.deferReply()
+        // await interaction.deferReply()
         // 실행해준다.
         currentCommand.execute(client, interaction)
         console.log(`info: command ${currentCommand.name} handled correctly`)
