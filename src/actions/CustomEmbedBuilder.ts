@@ -48,7 +48,9 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
   const embed = new EmbedBuilder()
     .setColor(0x00ff66)
     .setTitle(`${gameName}#${tagLine}`)
-    .setURL(`https://lol.ps/summoner/${gameName}_${tagLine}?region=kr`)
+    .setURL(
+      `https://lol.ps/summoner/${encodeURIComponent(`${gameName}_${tagLine}`)}?region=kr`,
+    )
     .setDescription('소환사의 랭크 지표와 24시간 내 랭크 전적을 조회합니다.')
     .setThumbnail(
       `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
