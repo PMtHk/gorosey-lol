@@ -5,7 +5,7 @@ import { accountV1, leagueV4, summonerV4 } from './riot'
 
 export const updateSummoner = async (
   inputGameName: string,
-  inputTagLine: string,
+  inputTagLine: string = 'KR1',
 ) => {
   try {
     await dbConnect()

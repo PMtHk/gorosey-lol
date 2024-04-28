@@ -1,6 +1,15 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js'
+import {
+  ActionRowBuilder,
+  ApplicationCommandOptionType,
+  ButtonBuilder,
+  ButtonStyle,
+} from 'discord.js'
 import { SlashCommand } from '../types/SlashCommand'
 import { fetchSummoner } from '../actions/fetchSummoner'
+import CustomEmbedBuilder, {
+  CustomEmbedData,
+} from '../actions/CustomEmbedBuilder'
+import { updateSummoner } from '../actions/updateSummoner'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -41,60 +50,100 @@ export const search: SlashCommand = {
     const { gameName, tagLine, profileIconId, lastUpdatedAt, summonerId } =
       summoner
 
-    console.log(summoner)
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { RANKED_SOLO_5x5, RANKED_FLEX_SR } = summonerId
 
-    const rank = {
-      SOLO: summonerId.RANKED_SOLO_5x5
-        ? `\`${summonerId.RANKED_SOLO_5x5.tier} ${summonerId.RANKED_SOLO_5x5.rank}\` - ${summonerId.RANKED_SOLO_5x5.leaguePoints}LP\n${summonerId.RANKED_SOLO_5x5.wins}승 ${summonerId.RANKED_SOLO_5x5.losses}패 (${Math.round(
-            (summonerId.RANKED_SOLO_5x5.wins /
-              (summonerId.RANKED_SOLO_5x5.wins +
-                summonerId.RANKED_SOLO_5x5.losses)) *
-              100,
-          )}%)`
-        : '정보 없음',
-      FLEX: summonerId.RANKED_FLEX_SR
-        ? `\`${summonerId.RANKED_FLEX_SR.tier} ${summonerId.RANKED_FLEX_SR.rank}\` - ${summonerId.RANKED_FLEX_SR.leaguePoints}LP\n${summonerId.RANKED_FLEX_SR.wins}승 ${summonerId.RANKED_FLEX_SR.losses}패 (${Math.round(
-            (summonerId.RANKED_FLEX_SR.wins /
-              (summonerId.RANKED_FLEX_SR.wins +
-                summonerId.RANKED_FLEX_SR.losses)) *
-              100,
-          )}%)`
-        : '정보 없음',
+    const data: CustomEmbedData = {
+      gameName,
+      tagLine,
+      profileIconId,
+      lastUpdatedAt,
+      RANKED_SOLO_5x5,
+      RANKED_FLEX_SR,
     }
 
-    const DATE_OPTIONS = {
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    }
+    const embed = CustomEmbedBuilder(data)
 
-    const embed = new EmbedBuilder()
-      .setColor(0x00ff66)
-      .setTitle(`${gameName}#${tagLine}`)
-      .setURL(`https://lol.ps/summoner/${gameName}_${tagLine}?region=kr`)
-      .setDescription('소환사의 랭크 지표와 24시간 내 랭크 전적을 조회합니다.')
-      .setThumbnail(
-        `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
+    // disable refresh button if last updated at is less than 30 mins
+    const isRefreshDisabled =
+      Date.now() - lastUpdatedAt.getTime() < 30 * 60 * 1000
+
+    const refreshButton = new ButtonBuilder()
+      .setCustomId('refresh')
+      .setLabel(
+        isRefreshDisabled
+          ? '30분이 지난 전적만 갱신이 가능합니다.'
+          : '전적 갱신하기',
       )
-      .addFields(
-        { name: '\n', value: '\n' },
-        { name: '개인/2인랭크', value: rank.SOLO, inline: true },
-        { name: '자유랭크', value: rank.FLEX, inline: true },
-        { name: '\n', value: '\n' },
-      )
-      .addFields(
-        { name: '24시간내 전적', value: '정보 없음' },
-        { name: '\n', value: '\n' },
-      )
-      .setFooter({
-        text: `최근 업데이트: ${lastUpdatedAt.toLocaleDateString('ko-KR', DATE_OPTIONS)}`,
-        iconURL: `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
+      .setStyle(isRefreshDisabled ? ButtonStyle.Secondary : ButtonStyle.Primary)
+      .setDisabled(isRefreshDisabled)
+
+    const response = await interaction.reply({
+      embeds: [embed],
+      components: [
+        new ActionRowBuilder<ButtonBuilder>({
+          components: [refreshButton],
+        }),
+      ],
+    })
+
+    const collectorFilter = (i) => i.user.id === interaction.user.id
+
+    try {
+      const userInteraction = await response.awaitMessageComponent({
+        filter: collectorFilter,
       })
 
-    await interaction.reply({
-      embeds: [embed],
-    })
+      if (userInteraction.customId === 'refresh') {
+        await userInteraction.update({
+          components: [
+            new ActionRowBuilder<ButtonBuilder>({
+              components: [
+                refreshButton
+                  .setDisabled(true)
+                  .setLabel('갱신 중...')
+                  .setStyle(ButtonStyle.Secondary),
+              ],
+            }),
+          ],
+        })
+        await updateSummoner(inputGameName, inputTagLine)
+
+        const updatedSummoner = await fetchSummoner(inputGameName, inputTagLine)
+
+        const updatedData: CustomEmbedData = {
+          gameName: updatedSummoner.gameName,
+          tagLine: updatedSummoner.tagLine,
+          profileIconId: updatedSummoner.profileIconId,
+          lastUpdatedAt: updatedSummoner.lastUpdatedAt,
+          RANKED_SOLO_5x5: updatedSummoner.summonerId.RANKED_SOLO_5x5,
+          RANKED_FLEX_SR: updatedSummoner.summonerId.RANKED_FLEX_SR,
+        }
+
+        const updatedEmbed = CustomEmbedBuilder(updatedData)
+
+        await userInteraction.editReply({
+          embeds: [updatedEmbed],
+          components: [
+            new ActionRowBuilder<ButtonBuilder>({
+              components: [
+                refreshButton
+                  .setDisabled(true)
+                  .setLabel('갱신 완료')
+                  .setStyle(ButtonStyle.Secondary),
+              ],
+            }),
+          ],
+        })
+      }
+    } catch (e) {
+      console.log(e)
+      await interaction.editReply({
+        content: '전적 갱신에 실패했습니다. 다시 시도해주세요.',
+        components: [],
+        embeds: [],
+      })
+    }
 
     console.log(
       `[channelId : ${interaction.channelId}] /search 명령어를 사용했습니다.`,

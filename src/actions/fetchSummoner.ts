@@ -5,7 +5,7 @@ import { updateSummoner } from './updateSummoner'
 
 export const fetchSummoner = async (
   inputGameName: string,
-  inputTagLine: string,
+  inputTagLine: string = 'KR1',
 ) => {
   try {
     await dbConnect()
