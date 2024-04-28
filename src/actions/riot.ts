@@ -1,6 +1,7 @@
 import { QueueType } from '../types/lol.types'
 import {
   AccountDto,
+  LeagueEntryDto,
   MatchDto,
   ParticipantDto,
   ResponseError,
@@ -30,6 +31,29 @@ export const accountV1 = async (_gameName: string, _tagLine: string) => {
       'X-Riot-Token': RIOT_API_KEY,
     },
     cache: 'force-cache',
+  })
+
+  const AccountInfo: AccountDto | ResponseError = await response.json()
+
+  if ('status' in AccountInfo)
+    return {
+      error: AccountInfo.status.message,
+    }
+
+  return {
+    riotPuuid: AccountInfo.puuid,
+    gameName: AccountInfo.gameName,
+    tagLine: AccountInfo.tagLine,
+  }
+}
+
+export const accountV1ByPuuid = async (riotPuuid: string) => {
+  const requestPath = `/riot/account/v1/accounts/by-puuid/${riotPuuid}`
+  const response: Response = await fetch(`${BASE_URL.ASIA}${requestPath}`, {
+    method: 'GET',
+    headers: {
+      'X-Riot-Token': RIOT_API_KEY,
+    },
   })
 
   const AccountInfo: AccountDto | ResponseError = await response.json()
@@ -94,7 +118,10 @@ export const matchesV5 = async (riotPuuid: string, queue: QueueType) => {
 
   const matchIdList: string[] | ResponseError = await response.json()
 
-  if ('status' in matchIdList) throw new Error(matchIdList.status.message)
+  if ('status' in matchIdList)
+    return {
+      error: matchIdList.status.message,
+    }
 
   return matchIdList
 }
@@ -110,7 +137,10 @@ export const matchV5 = async (matchId: string, riotPuuid: string) => {
 
   const matchInfo: MatchDto | ResponseError = await response.json()
 
-  if ('status' in matchInfo) throw new Error(matchInfo.status.message)
+  if ('status' in matchInfo)
+    return {
+      error: matchInfo.status.message,
+    }
 
   const {
     info: { participants, gameEndTimestamp, queueId },
@@ -159,4 +189,59 @@ export const matchV5 = async (matchId: string, riotPuuid: string) => {
   }
 
   return result
+}
+
+export const leagueV4 = async (summonerId: string) => {
+  const requestPath = `/lol/league/v4/entries/by-summoner/${summonerId}`
+  const response = await fetch(`${BASE_URL.KR}${requestPath}`, {
+    method: 'GET',
+    headers: {
+      'X-Riot-Token': RIOT_API_KEY,
+    },
+  })
+
+  const leagueInfo: LeagueEntryDto[] | ResponseError = await response.json()
+
+  if ('status' in leagueInfo)
+    return {
+      error: leagueInfo.status.message,
+    }
+
+  const SOLO = leagueInfo.find(
+    (elem: LeagueEntryDto) => elem.queueType === 'RANKED_SOLO_5x5',
+  )
+
+  const FLEX = leagueInfo.find(
+    (elem: LeagueEntryDto) => elem.queueType === 'RANKED_FLEX_SR',
+  )
+
+  let filteredSOLO = null
+  let filteredFLEX = null
+
+  if (SOLO) {
+    filteredSOLO = {
+      leagueId: SOLO.leagueId,
+      tier: SOLO.tier,
+      rank: SOLO.rank,
+      leaguePoints: SOLO.leaguePoints,
+      wins: SOLO.wins,
+      losses: SOLO.losses,
+    }
+  }
+
+  if (FLEX) {
+    filteredFLEX = {
+      leagueId: FLEX.leagueId,
+      tier: FLEX.tier,
+      rank: FLEX.rank,
+      leaguePoints: FLEX.leaguePoints,
+      wins: FLEX.wins,
+      losses: FLEX.losses,
+    }
+  }
+
+  return {
+    RANKED_SOLO_5x5: filteredSOLO,
+    RANKED_FLEX_SR: filteredFLEX,
+  }
 }

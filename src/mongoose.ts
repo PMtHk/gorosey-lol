@@ -10,6 +10,7 @@ let isConnected: boolean = false
 
 export const dbConnect = async () => {
   mongoose.set('strictQuery', true)
+  mongoose.set('strictPopulate', false)
 
   if (isConnected) return
 

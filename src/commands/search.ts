@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType } from 'discord.js'
 import { SlashCommand } from '../types/SlashCommand'
-import { findSummoner } from '../actions/summoner'
+import { fetchSummoner } from '../actions/fetchSummoner'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -36,7 +36,7 @@ export const search: SlashCommand = {
       return
     }
 
-    const summoner = await findSummoner(inputGameName, inputTagLine)
+    const summoner = await fetchSummoner(inputGameName, inputTagLine)
 
     console.log(summoner)
 
