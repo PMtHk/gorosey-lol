@@ -1,3 +1,4 @@
+import { DEFAULT_REFRESH_TIME } from '../constants/refreshTime'
 import Summoner from '../models/summoner.model'
 import { dbConnect } from '../mongoose'
 import { accountV1 } from './riot'
@@ -25,7 +26,7 @@ export const fetchSummoner = async (
 
     if (
       !summoner ||
-      summoner.lastUpdatedAt < new Date(Date.now() - 1000 * 60 * 60 * 3)
+      summoner.lastUpdatedAt < new Date(Date.now() - DEFAULT_REFRESH_TIME)
     ) {
       await updateSummoner(gameName, tagLine)
 

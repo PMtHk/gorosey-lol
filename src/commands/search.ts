@@ -10,6 +10,7 @@ import CustomEmbedBuilder, {
   CustomEmbedData,
 } from '../actions/CustomEmbedBuilder'
 import { updateSummoner } from '../actions/updateSummoner'
+import { BUTTON_REFRESH_TIME } from '../constants/refreshTime'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -23,77 +24,77 @@ export const search: SlashCommand = {
     },
   ],
   execute: async (_, interaction) => {
-    const input = (interaction.options.get('소환사')?.value || '') as string
-
-    if (!input.includes('#')) {
-      await interaction.followUp({
-        ephemeral: true,
-        content: '소환사명과 태그를 입력해주세요. (예시: 완도수산전복도둑#KR1)',
-      })
-
-      return
-    }
-
-    const [inputGameName, inputTagLine] = input.split('#')
-
-    if (!inputGameName || !inputTagLine) {
-      await interaction.followUp({
-        ephemeral: true,
-        content: '소환사명과 태그를 입력해주세요. (예시: 완도수산전복도둑#KR1)',
-      })
-
-      return
-    }
-
-    const summoner = await fetchSummoner(inputGameName, inputTagLine)
-
-    const { gameName, tagLine, profileIconId, lastUpdatedAt, summonerId } =
-      summoner
-
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { RANKED_SOLO_5x5, RANKED_FLEX_SR } = summonerId
-
-    const data: CustomEmbedData = {
-      gameName,
-      tagLine,
-      profileIconId,
-      lastUpdatedAt,
-      RANKED_SOLO_5x5,
-      RANKED_FLEX_SR,
-    }
-
-    const embed = CustomEmbedBuilder(data)
-
-    // disable refresh button if last updated at is less than 30 mins
-    const isRefreshDisabled =
-      Date.now() - lastUpdatedAt.getTime() < 30 * 60 * 1000
-
-    const refreshButton = new ButtonBuilder()
-      .setCustomId('refresh')
-      .setLabel(
-        isRefreshDisabled
-          ? '30분이 지난 전적만 갱신이 가능합니다.'
-          : '전적 갱신하기',
-      )
-      .setStyle(isRefreshDisabled ? ButtonStyle.Secondary : ButtonStyle.Primary)
-      .setDisabled(isRefreshDisabled)
-
-    const response = await interaction.reply({
-      embeds: [embed],
-      components: [
-        new ActionRowBuilder<ButtonBuilder>({
-          components: [refreshButton],
-        }),
-      ],
-    })
-
-    const collectorFilter = (i) => i.user.id === interaction.user.id
-
     try {
+      const input = (interaction.options.get('소환사')?.value || '') as string
+      const [inputGameName, inputTagLine] = input.split('#')
+
+      const summoner = await fetchSummoner(inputGameName, inputTagLine)
+      const {
+        gameName,
+        tagLine,
+        profileIconId,
+        lastUpdatedAt,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        summonerId: { RANKED_SOLO_5x5, RANKED_FLEX_SR },
+      } = summoner
+
+      if ('error' in summoner) {
+        await interaction.reply({
+          embeds: [
+            {
+              title: '존재하지 않는 소환사입니다.',
+              description: '소환사명과 태그를 다시 확인해주세요.',
+              color: 0xff0000,
+            },
+          ],
+        })
+
+        return
+      }
+
+      const data: CustomEmbedData = {
+        gameName,
+        tagLine,
+        profileIconId,
+        lastUpdatedAt,
+        RANKED_SOLO_5x5,
+        RANKED_FLEX_SR,
+      }
+
+      const embed = CustomEmbedBuilder(data)
+
+      // disable refresh button if last updated at is less than 30 mins
+      const isRefreshDisabled =
+        Date.now() - lastUpdatedAt.getTime() < BUTTON_REFRESH_TIME
+
+      const refreshButton = new ButtonBuilder()
+        .setCustomId('refresh')
+        .setLabel(
+          isRefreshDisabled
+            ? `${BUTTON_REFRESH_TIME / 60000}분이 지난 전적만 갱신이 가능합니다.`
+            : '전적 갱신하기',
+        )
+        .setStyle(
+          isRefreshDisabled ? ButtonStyle.Secondary : ButtonStyle.Primary,
+        )
+        .setDisabled(isRefreshDisabled)
+
+      const response = await interaction.reply({
+        embeds: [embed],
+        components: [
+          new ActionRowBuilder<ButtonBuilder>({
+            components: [refreshButton],
+          }),
+        ],
+      })
+
+      const collectorFilter = (i) => i.user.id === interaction.user.id
+
       const userInteraction = await response.awaitMessageComponent({
         filter: collectorFilter,
       })
 
+      // refresh button interaction
       if (userInteraction.customId === 'refresh') {
         await userInteraction.update({
           components: [
@@ -137,16 +138,16 @@ export const search: SlashCommand = {
         })
       }
     } catch (e) {
-      console.log(e)
       await interaction.editReply({
-        content: '전적 갱신에 실패했습니다. 다시 시도해주세요.',
-        components: [],
-        embeds: [],
+        embeds: [
+          {
+            title: '전적 조회에 실패했습니다.',
+            description:
+              '내부 서버의 오류일 수 있습니다. 잠시 후 다시 시도해주세요.',
+            color: 0xff0000,
+          },
+        ],
       })
     }
-
-    console.log(
-      `[channelId : ${interaction.channelId}] /search 명령어를 사용했습니다.`,
-    )
   },
 }
