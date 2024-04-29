@@ -1,7 +1,7 @@
 import BaseError from '../../errors/BaseError'
 import RiotAPIError from '../../errors/RiotAPI.error'
 import { riotInstance } from '../../apis/riotInstance'
-import { LeagueEntriesDto } from '../../types/riot.dtos'
+import { LeagueEntriesDto, LeagueEntryDto } from '../../types/riot.dtos'
 
 export const fetchLeagueEntriesDto = async (
   summonerId: string,
@@ -18,12 +18,56 @@ export const fetchLeagueEntriesDto = async (
         status: { message, status_code: statusCode },
       } = error.response.data
 
-      throw new RiotAPIError(statusCode, message)
+      throw new RiotAPIError(statusCode, message + ' - fetchLeagueEntriesDto')
     }
 
-    throw new BaseError(
-      500,
-      '서버에 문제가 발생했어요. 잠시 후 다시 시도해주세요.',
-    )
+    throw new BaseError(500, 'fetchLeagueEntriesDto error')
+  }
+}
+
+export const fetchLeagueStats = async (summonerId: string) => {
+  try {
+    const response = await fetchLeagueEntriesDto(summonerId)
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    let RANKED_SOLO_5x5 = null
+    let RANKED_FLEX_SR = null
+
+    if (!response)
+      return {
+        RANKED_SOLO_5x5,
+        RANKED_FLEX_SR,
+      }
+
+    response.forEach((leagueEntry: LeagueEntryDto) => {
+      if (leagueEntry.queueType === 'RANKED_SOLO_5x5') {
+        RANKED_SOLO_5x5 = {
+          leagueId: leagueEntry.leagueId,
+          tier: leagueEntry.tier,
+          rank: leagueEntry.rank,
+          leaguePoints: leagueEntry.leaguePoints,
+          wins: leagueEntry.wins,
+          losses: leagueEntry.losses,
+        }
+      } else if (leagueEntry.queueType === 'RANKED_FLEX_SR') {
+        RANKED_FLEX_SR = {
+          leagueId: leagueEntry.leagueId,
+          tier: leagueEntry.tier,
+          rank: leagueEntry.rank,
+          leaguePoints: leagueEntry.leaguePoints,
+          wins: leagueEntry.wins,
+          losses: leagueEntry.losses,
+        }
+      }
+    })
+
+    return {
+      RANKED_SOLO_5x5,
+      RANKED_FLEX_SR,
+    }
+  } catch (error) {
+    if (error instanceof BaseError) throw error
+
+    throw new BaseError(500, 'fetchLeagueStats error')
   }
 }

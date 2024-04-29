@@ -19,13 +19,10 @@ export const fetchAccountDto = async (
         status: { message, status_code: statusCode },
       } = error.response.data
 
-      throw new RiotAPIError(statusCode, message)
+      throw new RiotAPIError(statusCode, message + ' - fetchAccountDto')
     }
 
-    throw new BaseError(
-      500,
-      '서버에 문제가 발생했어요. 잠시 후 다시 시도해주세요.',
-    )
+    throw new BaseError(500, 'fetchAccountDto error')
   }
 }
 
@@ -44,12 +41,9 @@ export const fetchAccountDtoByPuuid = async (
         status: { message, status_code: statusCode },
       } = error.response.data
 
-      throw new RiotAPIError(statusCode, message)
+      throw new RiotAPIError(statusCode, message + ' - fetchAccountDtoByPuuid')
     }
 
-    throw new BaseError(
-      500,
-      '서버에 문제가 발생했어요. 잠시 후 다시 시도해주세요.',
-    )
+    throw new BaseError(500, 'fetchAccountDtoByPuuid error')
   }
 }

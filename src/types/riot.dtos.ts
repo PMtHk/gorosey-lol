@@ -24,7 +24,6 @@ export type SummonerDto = {
 export type LeagueEntryDto = {
   leagueId: string
   summonerId: string
-  summonerName: string
   queueType: string
   tier: string
   rank: string

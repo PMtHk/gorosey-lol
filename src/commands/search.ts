@@ -1,17 +1,22 @@
 import {
-  ActionRowBuilder,
   ApplicationCommandOptionType,
   ButtonBuilder,
   ButtonStyle,
+  ActionRowBuilder,
 } from 'discord.js'
-import { SlashCommand } from '../types/SlashCommand'
-import { fetchSummoner } from '../actions/fetchSummoner'
 import CustomEmbedBuilder, {
   CustomEmbedData,
 } from '../actions/CustomEmbedBuilder'
-import { updateSummoner } from '../actions/updateSummoner'
-import { BUTTON_REFRESH_TIME } from '../constants/refreshTime'
-import fetchMatchHistory from '../actions/fetchMatchHistory'
+import { createRankStat } from '../actions/db/rankstat/create'
+import { findRankStat } from '../actions/db/rankstat/find'
+import { updateRankStat } from '../actions/db/rankstat/update'
+import { createSummoner } from '../actions/db/summoner/create'
+import { updateSummoner } from '../actions/db/summoner/update'
+import { findSummoner } from '../actions/db/summoner/find'
+import { fetchAccountDto } from '../actions/riot/fetchAccountDto'
+import { fetchLeagueStats } from '../actions/riot/fetchLeagueEntryDtos'
+import { fetchSummonerDto } from '../actions/riot/fetchSummonerDto'
+import { SlashCommand } from '../types/SlashCommand'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -29,62 +34,87 @@ export const search: SlashCommand = {
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
 
-      const summoner = await fetchSummoner(inputGameName, inputTagLine)
-      if ('error' in summoner) {
-        await interaction.editReply({
-          embeds: [
-            {
-              title: '존재하지 않는 소환사입니다.',
-              description: '소환사명과 태그를 다시 확인해주세요.',
-              color: 0xff0000,
-            },
-          ],
+      let summonerId = ''
+      let riotPuuid = ''
+
+      let summonerInfo
+      let rankStatInfo
+
+      // 소환사명 및 태그로 riotAccount 정보를 가져옴
+      const { puuid, gameName, tagLine } = await fetchAccountDto(
+        inputGameName,
+        inputTagLine,
+      )
+      riotPuuid = puuid
+
+      const { id } = await fetchSummonerDto(puuid)
+      summonerId = id
+
+      // puuid로 DB내 소환사 정보를 가져옴
+      summonerInfo = await findSummoner(riotPuuid)
+
+      // DB에 소환사 정보가 없을 경우 새로 생성
+      if (!summonerInfo) {
+        const { profileIconId, summonerLevel } =
+          await fetchSummonerDto(riotPuuid)
+
+        console.log('id', id, '2')
+        await createSummoner({
+          riotPuuid,
+          gameName,
+          tagLine,
+          summonerId,
+          profileIconId,
+          summonerLevel,
         })
 
-        return
+        // 소환사 정보가 생성되면 생성된 소환사 정보를 가져옴
+        summonerInfo = await findSummoner(riotPuuid)
       }
-      const {
-        _id: riotPuuid,
-        gameName,
-        tagLine,
-        profileIconId,
-        lastUpdatedAt,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        summonerId: { RANKED_SOLO_5x5, RANKED_FLEX_SR },
-      } = summoner
 
-      const matchHistories = await fetchMatchHistory(riotPuuid)
+      // summonerId로 랭크 정보를 가져옴
+      console.log('summonerId', summonerId, '1')
+      rankStatInfo = await findRankStat(summonerId)
+
+      // DB에 랭크 정보가 없을 경우 새로 생성
+      if (!rankStatInfo) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { RANKED_SOLO_5x5, RANKED_FLEX_SR } =
+          await fetchLeagueStats(summonerId)
+
+        await createRankStat({
+          summonerId,
+          RANKED_SOLO_5x5,
+          RANKED_FLEX_SR,
+        })
+
+        // 랭크 정보가 생성되면 생성된 랭크 정보를 가져옴
+        rankStatInfo = await findRankStat(summonerId)
+      }
+
+      // TODO: matchHistories를 가져오는 로직 추가
 
       const data: CustomEmbedData = {
         gameName,
         tagLine,
-        profileIconId,
-        lastUpdatedAt,
-        RANKED_SOLO_5x5,
-        RANKED_FLEX_SR,
-        matchHistories,
+        profileIconId: summonerInfo.profileIconId,
+        lastUpdatedAt: summonerInfo.lastUpdatedAt,
+        RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,
+        RANKED_FLEX_SR: rankStatInfo.RANKED_FLEX_SR,
+        matchHistories: [],
       }
 
+      // Embed 생성
       const embed = CustomEmbedBuilder(data)
 
-      // disable refresh button if last updated at is less than 30 mins
-      const isRefreshDisabled =
-        Date.now() - lastUpdatedAt.getTime() < BUTTON_REFRESH_TIME
-
+      // Refresh 버튼 생성
       const refreshButton = new ButtonBuilder()
         .setCustomId('refresh')
-        .setLabel(
-          isRefreshDisabled
-            ? `${BUTTON_REFRESH_TIME / 60000}분이 지난 전적만 갱신이 가능합니다.`
-            : '전적 갱신하기',
-        )
-        .setStyle(
-          isRefreshDisabled ? ButtonStyle.Secondary : ButtonStyle.Primary,
-        )
-        .setDisabled(isRefreshDisabled)
+        .setLabel('전적 갱신하기')
+        .setStyle(ButtonStyle.Primary)
 
       const response = await interaction.editReply({
-        embeds: [embed.toJSON()],
+        embeds: [embed],
         components: [
           new ActionRowBuilder<ButtonBuilder>({
             components: [refreshButton],
@@ -92,24 +122,19 @@ export const search: SlashCommand = {
         ],
       })
 
-      // 더 수행할 작업이 없으므로 return
-      // return 없을 시 강제 추방되는 경우 앱이 죽는 문제가 있음
-      if (isRefreshDisabled) return
-
-      // 멤버목록 가져와서 버튼을 클릭이 가능하도록 필터링
-      const userGuilds = interaction.client.guilds.cache.get(
-        interaction.guildId,
-      ).members.cache
-
-      const memberIds = userGuilds.map((member) => member.user.id)
+      // 멤버목록 가져와서 해당 멤버들이 버튼과 상호작용 가능하도록 필터링
+      const guilds = interaction.client.guilds.cache.get(interaction.guildId)
+        .members.cache
+      const memberIds = guilds.map((member) => member.user.id)
 
       const collectorFilter = (i) => memberIds.includes(i.user.id)
 
+      // 버튼 클릭 대기
       const userInteraction = await response.awaitMessageComponent({
         filter: collectorFilter,
       })
 
-      // refresh button interaction
+      // refresh 버튼 클릭 시
       if (userInteraction.customId === 'refresh') {
         await userInteraction.update({
           components: [
@@ -123,18 +148,43 @@ export const search: SlashCommand = {
             }),
           ],
         })
-        await updateSummoner(inputGameName, inputTagLine)
 
-        const updatedSummoner = await fetchSummoner(inputGameName, inputTagLine)
+        // 소환사 정보 갱신
+        const { profileIconId, summonerLevel } =
+          await fetchSummonerDto(riotPuuid)
+
+        await updateSummoner({
+          riotPuuid,
+          gameName,
+          tagLine,
+          summonerId,
+          profileIconId,
+          summonerLevel,
+        })
+
+        summonerInfo = await findSummoner(riotPuuid)
+
+        // 랭크 정보 갱신
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { RANKED_SOLO_5x5, RANKED_FLEX_SR } =
+          await fetchLeagueStats(summonerId)
+
+        await updateRankStat({
+          summonerId,
+          RANKED_SOLO_5x5,
+          RANKED_FLEX_SR,
+        })
+
+        rankStatInfo = await findRankStat(summonerId)
 
         const updatedData: CustomEmbedData = {
-          gameName: updatedSummoner.gameName,
-          tagLine: updatedSummoner.tagLine,
-          profileIconId: updatedSummoner.profileIconId,
-          lastUpdatedAt: updatedSummoner.lastUpdatedAt,
-          RANKED_SOLO_5x5: updatedSummoner.summonerId.RANKED_SOLO_5x5,
-          RANKED_FLEX_SR: updatedSummoner.summonerId.RANKED_FLEX_SR,
-          matchHistories,
+          gameName,
+          tagLine,
+          profileIconId: summonerInfo.profileIconId,
+          lastUpdatedAt: summonerInfo.lastUpdatedAt,
+          RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,
+          RANKED_FLEX_SR: rankStatInfo.RANKED_FLEX_SR,
+          matchHistories: [],
         }
 
         const updatedEmbed = CustomEmbedBuilder(updatedData)
@@ -153,19 +203,9 @@ export const search: SlashCommand = {
           ],
         })
       }
-
-      return
-    } catch (e) {
-      console.log(e)
+    } catch (error) {
       await interaction.editReply({
-        embeds: [
-          {
-            title: '전적 조회에 실패했습니다.',
-            description:
-              '내부 서버의 오류일 수 있습니다. 잠시 후 다시 시도해주세요.',
-            color: 0xff0000,
-          },
-        ],
+        embeds: [error.generateEmbed()],
       })
     }
   },

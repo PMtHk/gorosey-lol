@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import DBError from './errors/DB.error'
 
 const { MONGODB_URI, MONGODB_DBNAME } = process.env
 
@@ -21,7 +22,7 @@ export const dbConnect = async () => {
 
     isConnected = true
   } catch (error) {
-    console.error('Error connecting to database', error)
+    throw new DBError(500, 'dbConnect error')
   }
 }
 
@@ -33,6 +34,6 @@ export const dbDisconnect = async () => {
 
     isConnected = false
   } catch (error) {
-    console.error('Error disconnecting from database', error)
+    throw new DBError(500, 'dbDisconnect error')
   }
 }

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const rankStatSchema = new mongoose.Schema({
-  _id: { type: String },
+  _id: { type: String }, // summonerId
   RANKED_SOLO_5x5: {
     leagueId: { type: String },
     tier: { type: String, default: 'UNRANKED' },

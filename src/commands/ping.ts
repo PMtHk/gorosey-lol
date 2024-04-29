@@ -13,22 +13,19 @@ export const ping: SlashCommand = {
       await interaction.editReply({
         embeds: [
           new EmbedBuilder()
+            .setColor('#0299FF')
             .setTitle(`🏓  ${interaction.client.ws.ping} ms`)
             .setTimestamp(),
         ],
       })
-
-      return
     } catch (error) {
       const unexpectedError = new BaseError(
         500,
-        '🛠️ 왜 아픈지 모르겠어요... 열심히 고쳐볼게요.',
+        '[PING|SLASH COMMAND] unexpected error',
       )
       await interaction.editReply({
         embeds: [unexpectedError.generateEmbed()],
       })
-
-      // TODO: 에러 로그 전송
     }
   },
 }
