@@ -1,6 +1,7 @@
-import { EmbedBuilder } from 'discord.js'
+import { ColorResolvable, EmbedBuilder } from 'discord.js'
 import { Lane } from '../types/lol.types'
 import { champions } from '../constants/champions'
+import { tierInfos } from '../constants/rank'
 
 export interface CustomEmbedData {
   gameName: string
@@ -76,8 +77,17 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
         )}%)`
       : '정보 없음'
 
+  const tier =
+    solo && solo.tier && solo.tier !== 'UNRANKED'
+      ? solo.tier
+      : flex && flex.tier && flex.tier !== 'UNRANKED'
+        ? flex.tier
+        : 'UNRANKED'
+
+  const color = tierInfos.find((i) => i.id === tier)?.color as ColorResolvable
+
   const embed = new EmbedBuilder()
-    .setColor(0x00ff66)
+    .setColor(color)
     .setTitle(`${gameName}#${tagLine}`)
     .setURL(
       `https://lol.ps/summoner/${encodeURIComponent(`${gameName}_${tagLine}`)}?region=kr`,

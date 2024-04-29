@@ -43,3 +43,35 @@ export const fetchSummoner = async (
     }
   }
 }
+
+export const fetchSummonerByPuuid = async (puuid: string) => {
+  await dbConnect()
+
+  const summoner = await Summoner.findById(puuid).populate(
+    'summonerId',
+    'RANKED_SOLO_5x5 RANKED_FLEX_SR',
+  )
+
+  if (!summoner) return undefined
+
+  const {
+    _id: riotPuuid,
+    gameName,
+    tagLine,
+    profileIconId,
+    lastUpdatedAt,
+    // 'RANKED_SOLO_5x5' and 'RANKED_FLEX_SR' are riot api's response
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    summonerId: { RANKED_SOLO_5x5, RANKED_FLEX_SR },
+  } = summoner
+
+  return {
+    riotPuuid,
+    gameName,
+    tagLine,
+    profileIconId,
+    lastUpdatedAt,
+    RANKED_SOLO_5x5: RANKED_SOLO_5x5.leagueId ? RANKED_SOLO_5x5 : null,
+    RANKED_FLEX_SR: RANKED_FLEX_SR.leagueId ? RANKED_FLEX_SR : null,
+  }
+}
