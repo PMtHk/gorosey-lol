@@ -13,12 +13,11 @@ export type AccountDto = {
 }
 
 export type SummonerDto = {
+  id: string // SummonerId
   accountId: string
+  puuid: string // riotPuuid
   profileIconId: number
   revisionDate: number // Epoch
-  name: string
-  id: string // SummonerId
-  puuid: string // riotPuuid
   summonerLevel: number
 }
 
@@ -38,6 +37,8 @@ export type LeagueEntryDto = {
   inactive: boolean
   miniSeries?: MiniSeriesDto
 }
+
+export type LeagueEntriesDto = LeagueEntryDto[]
 
 export type MiniSeriesDto = {
   losses: number
