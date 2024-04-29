@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import DBError from './errors/DB.error'
+import DBError from './errors/DBError'
 
 const { MONGODB_URI, MONGODB_DBNAME } = process.env
 

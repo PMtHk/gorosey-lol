@@ -1,4 +1,4 @@
-import DBError from '../../../errors/DB.error'
+import DBError from '../../../errors/DBError'
 import RankStat from '../../../models/rankstat.model'
 import { dbConnect } from '../../../mongoose'
 

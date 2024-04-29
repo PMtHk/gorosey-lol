@@ -1,5 +1,5 @@
 import BaseError from '../../errors/BaseError'
-import RiotAPIError from '../../errors/RiotAPI.error'
+import RiotAPIError from '../../errors/RiotAPIError'
 import { riotInstance } from '../../apis/riotInstance'
 import { LeagueEntriesDto, LeagueEntryDto } from '../../types/riot.dtos'
 

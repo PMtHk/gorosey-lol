@@ -1,4 +1,4 @@
-import DBError from '../../../errors/DB.error'
+import DBError from '../../../errors/DBError'
 import Summoner from '../../../models/summoner.model'
 import { dbConnect } from '../../../mongoose'
 

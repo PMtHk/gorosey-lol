@@ -187,6 +187,7 @@ export const search: SlashCommand = {
           matchHistories: [],
         }
 
+        // 갱신된 Embed 생성
         const updatedEmbed = CustomEmbedBuilder(updatedData)
 
         await userInteraction.editReply({
