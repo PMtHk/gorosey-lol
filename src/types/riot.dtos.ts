@@ -232,3 +232,5 @@ export type PerkSelectionDto = {
   var2: number
   var3: number
 }
+
+export type MatchesDto = string[]

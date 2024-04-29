@@ -1,8 +1,10 @@
+import axios from 'axios'
 import { QueueType } from '../types/lol.types'
 import {
   AccountDto,
   LeagueEntryDto,
   MatchDto,
+  MatchesDto,
   ParticipantDto,
   ResponseError,
   SummonerDto,
