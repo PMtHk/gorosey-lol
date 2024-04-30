@@ -5,7 +5,7 @@ import { AccountDto } from '../../types/riot.dtos'
 
 export const fetchAccountDto = async (
   gameName: string,
-  tagLine: string,
+  tagLine: string = 'KR1',
 ): Promise<AccountDto> => {
   try {
     const response = await riotInstance.asia.get<AccountDto>(

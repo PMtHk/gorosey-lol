@@ -4,9 +4,9 @@ import {
   ButtonStyle,
   ActionRowBuilder,
 } from 'discord.js'
-import CustomEmbedBuilder, {
-  CustomEmbedData,
-} from '../actions/CustomEmbedBuilder'
+import SearchEmbedBuilder, {
+  SearchEmbedBuilderData,
+} from '../actions/SearchEmbedBuilder'
 import { createRankStat } from '../actions/db/rankstat/create'
 import { findRankStat } from '../actions/db/rankstat/find'
 import { updateRankStat } from '../actions/db/rankstat/update'
@@ -17,6 +17,8 @@ import { fetchAccountDto } from '../actions/riot/fetchAccountDto'
 import { fetchLeagueStats } from '../actions/riot/fetchLeagueEntryDtos'
 import { fetchSummonerDto } from '../actions/riot/fetchSummonerDto'
 import { SlashCommand } from '../types/SlashCommand'
+import { fetchRankMatchesDto } from '../actions/riot/fetchMatchesDto'
+import { fetchMatchHistory } from '../actions/riot/fetchMatchDto'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -58,7 +60,6 @@ export const search: SlashCommand = {
         const { profileIconId, summonerLevel } =
           await fetchSummonerDto(riotPuuid)
 
-        console.log('id', id, '2')
         await createSummoner({
           riotPuuid,
           gameName,
@@ -73,7 +74,6 @@ export const search: SlashCommand = {
       }
 
       // summonerId로 랭크 정보를 가져옴
-      console.log('summonerId', summonerId, '1')
       rankStatInfo = await findRankStat(summonerId)
 
       // DB에 랭크 정보가 없을 경우 새로 생성
@@ -92,20 +92,29 @@ export const search: SlashCommand = {
         rankStatInfo = await findRankStat(summonerId)
       }
 
-      // TODO: matchHistories를 가져오는 로직 추가
+      // 소환사의 하루 전적을 불러옴
+      const matchIds = await fetchRankMatchesDto(riotPuuid)
 
-      const data: CustomEmbedData = {
+      const matchHistories = []
+
+      // 전적을 하나씩 불러와 matchHistories에 추가
+      for await (const matchId of matchIds) {
+        const matchHistory = await fetchMatchHistory(matchId, riotPuuid)
+        matchHistories.push(matchHistory)
+      }
+
+      const data: SearchEmbedBuilderData = {
         gameName,
         tagLine,
         profileIconId: summonerInfo.profileIconId,
         lastUpdatedAt: summonerInfo.lastUpdatedAt,
         RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,
         RANKED_FLEX_SR: rankStatInfo.RANKED_FLEX_SR,
-        matchHistories: [],
+        matchHistories,
       }
 
       // Embed 생성
-      const embed = CustomEmbedBuilder(data)
+      const embed = SearchEmbedBuilder(data)
 
       // Refresh 버튼 생성
       const refreshButton = new ButtonBuilder()
@@ -177,18 +186,18 @@ export const search: SlashCommand = {
 
         rankStatInfo = await findRankStat(summonerId)
 
-        const updatedData: CustomEmbedData = {
+        const updatedData: SearchEmbedBuilderData = {
           gameName,
           tagLine,
           profileIconId: summonerInfo.profileIconId,
           lastUpdatedAt: summonerInfo.lastUpdatedAt,
           RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,
           RANKED_FLEX_SR: rankStatInfo.RANKED_FLEX_SR,
-          matchHistories: [],
+          matchHistories,
         }
 
         // 갱신된 Embed 생성
-        const updatedEmbed = CustomEmbedBuilder(updatedData)
+        const updatedEmbed = SearchEmbedBuilder(updatedData)
 
         await userInteraction.editReply({
           embeds: [updatedEmbed],

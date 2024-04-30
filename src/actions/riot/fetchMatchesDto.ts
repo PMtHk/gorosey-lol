@@ -42,3 +42,40 @@ export const fetchMatchesDto = async (
     throw new BaseError(500, 'fetchMatchesDto error')
   }
 }
+
+export const fetchRankMatchesDto = async (riotPuuid: string) => {
+  try {
+    const soloOptions = {
+      startTime: Math.round(Date.now() / 1000) - 60 * 60 * 24 * 1,
+      endTime: Math.round(Date.now() / 1000),
+      queue: 420,
+      type: '',
+      start: 0,
+      count: 100,
+    }
+
+    const flexOptions = {
+      startTime: Math.round(Date.now() / 1000) - 60 * 60 * 24 * 1,
+      endTime: Math.round(Date.now() / 1000),
+      queue: 440,
+      type: '',
+      start: 0,
+      count: 100,
+    }
+
+    const soloMatches = await fetchMatchesDto(riotPuuid, soloOptions)
+    const flexMatches = await fetchMatchesDto(riotPuuid, flexOptions)
+
+    return [...soloMatches, ...flexMatches]
+  } catch (error) {
+    if (error instanceof BaseError) {
+      if (error.statusCode === 404) {
+        return []
+      }
+
+      throw error
+    }
+
+    throw new BaseError(500, 'fetchRankMatchesDto error')
+  }
+}

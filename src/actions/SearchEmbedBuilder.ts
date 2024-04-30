@@ -3,22 +3,22 @@ import { Lane } from '../types/lol.types'
 import { champions } from '../constants/champions'
 import { tierInfos } from '../constants/rank'
 
-export interface CustomEmbedData {
+export interface SearchEmbedBuilderData {
   gameName: string
   tagLine: string
   profileIconId: number
   lastUpdatedAt: Date
   matchHistories: {
-    type: string
-    championName: string
-    kills: number
-    deaths: number
     assists: number
-    win: boolean
+    championName: string
+    deaths: number
+    gameEndTimestamp: number
+    gameType: string
+    kills: number
     position: Lane
     totalMinionsKilled: number
+    win: boolean
     visionScore: number
-    gameEndTimestamp: number
   }[]
   RANKED_SOLO_5x5: {
     tier: string
@@ -36,7 +36,7 @@ export interface CustomEmbedData {
   }
 }
 
-export default function CustomEmbedBuilder(data: CustomEmbedData) {
+export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
   const {
     gameName,
     tagLine,
@@ -52,15 +52,30 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
   let wins = 0
   let historyString = ''
 
+  let winAndTypeField = ''
+  let championField = ''
+  let kdaAndScoreField = ''
+
   matchHistories.forEach((match) => {
     if (match.win) wins++
 
-    const win = match.win ? '승리' : '패배'
-    const type = match.type === 'RANKED_SOLO_5x5' ? '개인/2인랭크' : '자유랭크'
-    const kda = `${match.kills}/${match.deaths}/${match.assists}`
-    const score = ((match.kills + match.assists) / match.deaths).toFixed(2)
+    const win = match.win ? '✅ 승' : '❌ 패'
+    const type =
+      match.gameType === 'RANKED_SOLO_5x5' ? '개인/2인랭크' : '자유랭크'
 
-    historyString += `${win} \`|\` ${type} \`|\` ${champions[match.championName]} \`|\` ${kda} \`|\` ${score} 평점 \n`
+    const kda = `${match.kills}/${match.deaths}/${match.assists}`
+    const score =
+      match.deaths === 0
+        ? 'Perfect'
+        : ((match.kills + match.assists) / match.deaths).toFixed(1)
+
+    historyString +=
+      `${win}${type.padStart(4, '\u00A0')}` +
+      `${champions[match.championName].padStart(12, '\u00A0')}${kda.padStart(18, '\u00A0')}  ${score.padStart(24, '\u00A0')} 평점 \n`
+
+    winAndTypeField += `${win} ${type}\n`
+    championField += `${champions[match.championName]}\n`
+    kdaAndScoreField += `${kda.padEnd(12, '\u00A0')}${score}\n`
   })
 
   const SOLO =
@@ -107,10 +122,6 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
         name: '최근 전적',
         value: `\`${matchCount}전 ${wins}승 ${matchCount - wins}패\`\n`,
       },
-      {
-        name: '대전 기록',
-        value: matchCount > 0 ? historyString : '최근 전적이 없습니다.',
-      },
       { name: '\n', value: '\n' },
     )
     .setFooter({
@@ -122,6 +133,26 @@ export default function CustomEmbedBuilder(data: CustomEmbedData) {
       })}`,
       iconURL: `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
     })
+
+  if (matchCount > 0) {
+    embed.addFields(
+      {
+        name: '대전 기록',
+        value: winAndTypeField,
+        inline: true,
+      },
+      {
+        name: '\u200B',
+        value: championField,
+        inline: true,
+      },
+      {
+        name: '\u200B',
+        value: kdaAndScoreField,
+        inline: true,
+      },
+    )
+  }
 
   return embed
 }
