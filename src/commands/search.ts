@@ -20,6 +20,7 @@ import { fetchSummonerDto } from '../actions/riot/fetchSummonerDto'
 import { SlashCommand } from '../types/SlashCommand'
 import { fetchRankMatchesDto } from '../actions/riot/fetchMatchesDto'
 import { fetchMatchHistory } from '../actions/riot/fetchMatchDto'
+import BaseError from '../errors/BaseError'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -214,8 +215,20 @@ export const search: SlashCommand = {
         })
       }
     } catch (error) {
+      if (error instanceof BaseError) {
+        await interaction.editReply({
+          embeds: [error.generateEmbed()],
+        })
+        return
+      }
+
+      const unexpectedError = new BaseError(
+        500,
+        '[SEARCH|SLASH COMMAND] unexpected error',
+      )
+
       await interaction.editReply({
-        embeds: [error.generateEmbed()],
+        embeds: [unexpectedError.generateEmbed()],
       })
     }
   },
