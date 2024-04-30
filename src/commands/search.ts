@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ActionRowBuilder,
+  ComponentType,
 } from 'discord.js'
 import SearchEmbedBuilder, {
   SearchEmbedBuilderData,
@@ -136,11 +137,10 @@ export const search: SlashCommand = {
         .members.cache
       const memberIds = guilds.map((member) => member.user.id)
 
-      const collectorFilter = (i) => memberIds.includes(i.user.id)
-
       // 버튼 클릭 대기
       const userInteraction = await response.awaitMessageComponent({
-        filter: collectorFilter,
+        componentType: ComponentType.Button,
+        filter: (i) => memberIds.includes(i.user.id),
       })
 
       // refresh 버튼 클릭 시
