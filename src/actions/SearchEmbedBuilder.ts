@@ -50,7 +50,6 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
   // match history
   const matchCount = matchHistories.length
   let wins = 0
-  let historyString = ''
 
   let winAndTypeField = ''
   let championField = ''
@@ -68,10 +67,6 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
       match.deaths === 0
         ? 'Perfect'
         : ((match.kills + match.assists) / match.deaths).toFixed(1)
-
-    historyString +=
-      `${win}${type.padStart(4, '\u00A0')}` +
-      `${champions[match.championName].padStart(12, '\u00A0')}${kda.padStart(18, '\u00A0')}  ${score.padStart(24, '\u00A0')} 평점 \n`
 
     winAndTypeField += `${win} ${type}\n`
     championField += `${champions[match.championName]}\n`
