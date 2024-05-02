@@ -15,9 +15,10 @@ export const watchList: SlashCommand = {
     try {
       await dbConnect()
 
-      // get guildId
+      // get guildId and channelId
       const guildId = interaction.guildId
       const guildName = interaction.guild?.name
+      const channelId = interaction.channelId
 
       // find channel from DB
       const channel = await findChannel(guildId)
@@ -25,7 +26,7 @@ export const watchList: SlashCommand = {
       // if channel is not found
       if (!channel) {
         // create new channel and reply with empty watchList
-        await createChannel(guildId)
+        await createChannel(guildId, channelId)
 
         await interaction.editReply({
           embeds: [

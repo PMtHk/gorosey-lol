@@ -28,6 +28,9 @@ export const register: SlashCommand = {
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
 
+      const guildId = interaction.guildId
+      const channelId = interaction.channelId
+
       let summonerId = ''
       let riotPuuid = ''
 
@@ -85,15 +88,15 @@ export const register: SlashCommand = {
       }
 
       // add member to watchList
-      let channel = await findChannel(interaction.guildId)
+      let channel = await findChannel(guildId)
 
       // if channel is not found
       if (!channel) {
         // create new channel and reply with empty watchList
-        await createChannel(interaction.guildId)
+        await createChannel(guildId, channelId)
 
         // refresh channelinfo
-        channel = await findChannel(interaction.guildId)
+        channel = await findChannel(guildId)
       }
 
       if (channel.watchList.includes(riotPuuid)) {
@@ -124,7 +127,7 @@ export const register: SlashCommand = {
 
       const newWatchList = [...channel.watchList, riotPuuid]
 
-      await updateChannel(interaction.guildId, newWatchList)
+      await updateChannel(guildId, newWatchList)
 
       await interaction.editReply({
         embeds: [
