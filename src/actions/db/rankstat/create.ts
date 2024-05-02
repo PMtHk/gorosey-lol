@@ -1,5 +1,5 @@
 import DBError from '../../../errors/DBError'
-import RankStat from '../../../models/rankstat.model'
+import RankStat from '../../../models/rankStat.model'
 import { dbConnect } from '../../../mongoose'
 
 interface CreateRankStatInput {

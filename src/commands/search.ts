@@ -8,9 +8,9 @@ import {
 import SearchEmbedBuilder, {
   SearchEmbedBuilderData,
 } from '../actions/SearchEmbedBuilder'
-import { createRankStat } from '../actions/db/rankstat/create'
-import { findRankStat } from '../actions/db/rankstat/find'
-import { updateRankStat } from '../actions/db/rankstat/update'
+import { createRankStat } from '../actions/db/rankStat/create'
+import { findRankStat } from '../actions/db/rankStat/find'
+import { updateRankStat } from '../actions/db/rankStat/update'
 import { createSummoner } from '../actions/db/summoner/create'
 import { updateSummoner } from '../actions/db/summoner/update'
 import { findSummoner } from '../actions/db/summoner/find'
