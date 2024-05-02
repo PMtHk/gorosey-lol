@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const channelSchema = new mongoose.Schema({
   _id: { type: String },
-  channelId: { type: String, required: true },
+  textChannel: { type: String, required: true },
   watchList: [
     {
       type: String,

@@ -2,11 +2,13 @@ import { ColorResolvable, EmbedBuilder } from 'discord.js'
 import { Lane } from '../types/lol.types'
 import { champions } from '../constants/champions'
 import { tierInfos } from '../constants/rank'
+import { elapsedTime } from '../utils/elapsedTime'
 
 export interface SearchEmbedBuilderData {
   gameName: string
   tagLine: string
   profileIconId: number
+  summonerLevel: number
   lastUpdatedAt: Date
   matchHistories: {
     assists: number
@@ -41,6 +43,7 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
     gameName,
     tagLine,
     profileIconId,
+    summonerLevel,
     lastUpdatedAt,
     RANKED_SOLO_5x5: solo,
     RANKED_FLEX_SR: flex,
@@ -53,7 +56,7 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
 
   let winAndTypeField = ''
   let championField = ''
-  let kdaAndScoreField = ''
+  let kdaAndTime = ''
 
   matchHistories.forEach((match) => {
     if (match.win) wins++
@@ -63,14 +66,10 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
       match.gameType === 'RANKED_SOLO_5x5' ? '개인/2인랭크' : '자유랭크'
 
     const kda = `${match.kills}/${match.deaths}/${match.assists}`
-    const score =
-      match.deaths === 0
-        ? 'Perfect'
-        : ((match.kills + match.assists) / match.deaths).toFixed(1)
 
-    winAndTypeField += `${win} ${type}\n`
+    winAndTypeField += `${win}  ${type}\n`
     championField += `${champions[match.championName]}\n`
-    kdaAndScoreField += `${kda.padEnd(12, '\u00A0')}${score}\n`
+    kdaAndTime += `${kda.padEnd(12, '\u00A0')}${elapsedTime(match.gameEndTimestamp)}\n`
   })
 
   const SOLO =
@@ -98,11 +97,11 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
 
   const embed = new EmbedBuilder()
     .setColor(color)
-    .setTitle(`${gameName}#${tagLine}`)
+    .setTitle(`${gameName}#${tagLine} (Lv.${summonerLevel})`)
     .setURL(
       `https://lol.ps/summoner/${encodeURIComponent(`${gameName}_${tagLine}`)}?region=kr`,
     )
-    .setDescription('소환사의 랭크 지표와 24시간 내 랭크 전적을 조회합니다.')
+    .setDescription('랭크 정보와 24시간 내의 랭크 게임 플레이를 조회합니다.')
     .setThumbnail(
       `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
     )
@@ -120,12 +119,15 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
       { name: '\n', value: '\n' },
     )
     .setFooter({
-      text: `최근 업데이트: ${lastUpdatedAt.toLocaleDateString('ko-KR', {
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      })}`,
+      text: `${gameName}#${tagLine} | ${lastUpdatedAt.toLocaleDateString(
+        'ko-KR',
+        {
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        },
+      )}에 갱신됨`,
       iconURL: `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
     })
 
@@ -143,7 +145,7 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
       },
       {
         name: '\u200B',
-        value: kdaAndScoreField,
+        value: kdaAndTime,
         inline: true,
       },
     )

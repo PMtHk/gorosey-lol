@@ -108,6 +108,7 @@ export const search: SlashCommand = {
       const data: SearchEmbedBuilderData = {
         gameName,
         tagLine,
+        summonerLevel: summonerInfo.summonerLevel,
         profileIconId: summonerInfo.profileIconId,
         lastUpdatedAt: summonerInfo.lastUpdatedAt,
         RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,
@@ -190,6 +191,7 @@ export const search: SlashCommand = {
         const updatedData: SearchEmbedBuilderData = {
           gameName,
           tagLine,
+          summonerLevel: summonerInfo.summonerLevel,
           profileIconId: summonerInfo.profileIconId,
           lastUpdatedAt: summonerInfo.lastUpdatedAt,
           RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,

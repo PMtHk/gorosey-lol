@@ -6,6 +6,7 @@ import {
   TextChannel,
 } from 'discord.js'
 import commands from './commands'
+import { startWatch } from './actions/startWatch'
 
 const { DISCORD_TOKEN, ALERT_CHANNEL_CHAT_CHANNELID } = process.env
 if (!DISCORD_TOKEN) {
@@ -29,14 +30,13 @@ client.once(Events.ClientReady, async () => {
       await client.application.commands.create(command)
     }
 
-    // send message
-    console.log('info: bot is ready')
-
-    const textChannel = client.channels.cache.get(
+    const alertChannel = client.channels.cache.get(
       ALERT_CHANNEL_CHAT_CHANNELID,
     ) as TextChannel
 
-    textChannel.send('[GOROSEY] BOT IS READY!')
+    alertChannel.send('[GOROSEY] BOT IS READY!')
+
+    startWatch(client)
   }
 })
 
@@ -54,11 +54,11 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 })
 
 client.on(Events.Error, (error) => {
-  const textChannel = client.channels.cache.get(
+  const alertChannel = client.channels.cache.get(
     ALERT_CHANNEL_CHAT_CHANNELID,
   ) as TextChannel
 
-  textChannel.send(`[GOROSEY] ERROR: ${error.message}`)
+  alertChannel.send(`[GOROSEY] ERROR: ${error.message}`)
 })
 
 client.login(DISCORD_TOKEN)
