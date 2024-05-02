@@ -8,6 +8,10 @@ import {
 import commands from './commands'
 import { startWatch } from './actions/startWatch'
 
+import * as dotenv from 'dotenv'
+
+dotenv.config()
+
 const { DISCORD_TOKEN, ALERT_CHANNEL_CHAT_CHANNELID } = process.env
 if (!DISCORD_TOKEN) {
   throw new Error('[ENV] DISCORD_TOKEN을 불러올 수 없습니다.')
