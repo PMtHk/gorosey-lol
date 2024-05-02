@@ -1,15 +1,14 @@
 import {
-  ActionRowBuilder,
-  ComponentType,
   EmbedBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
+  ActionRowBuilder,
+  ComponentType,
 } from 'discord.js'
-import { findChannel } from '../actions/db/channel/find'
+import { findChannel, updateChannel } from '../actions/channel.actions'
+import { fetchAccountDtoByPuuid } from '../actions/riot/fetchAccountDto'
 import BaseError from '../errors/BaseError'
 import { SlashCommand } from '../types/SlashCommand'
-import { fetchAccountDtoByPuuid } from '../actions/riot/fetchAccountDto'
-import { updateChannel } from '../actions/db/channel/update'
 
 export const deregister: SlashCommand = {
   name: '해제',

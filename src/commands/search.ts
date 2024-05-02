@@ -8,19 +8,23 @@ import {
 import SearchEmbedBuilder, {
   SearchEmbedBuilderData,
 } from '../actions/SearchEmbedBuilder'
-import { createRankStat } from '../actions/db/rankStat/create'
-import { findRankStat } from '../actions/db/rankStat/find'
-import { updateRankStat } from '../actions/db/rankStat/update'
-import { createSummoner } from '../actions/db/summoner/create'
-import { updateSummoner } from '../actions/db/summoner/update'
-import { findSummoner } from '../actions/db/summoner/find'
+import {
+  findRankStat,
+  createRankStat,
+  updateRankStat,
+} from '../actions/rankStat.actions'
 import { fetchAccountDto } from '../actions/riot/fetchAccountDto'
 import { fetchLeagueStats } from '../actions/riot/fetchLeagueEntryDtos'
-import { fetchSummonerDto } from '../actions/riot/fetchSummonerDto'
-import { SlashCommand } from '../types/SlashCommand'
-import { fetchRankMatchesDto } from '../actions/riot/fetchMatchesDto'
 import { fetchMatchHistory } from '../actions/riot/fetchMatchDto'
+import { fetchRankMatchesDto } from '../actions/riot/fetchMatchesDto'
+import { fetchSummonerDto } from '../actions/riot/fetchSummonerDto'
+import {
+  findSummoner,
+  createSummoner,
+  updateSummoner,
+} from '../actions/summoner.actions'
 import BaseError from '../errors/BaseError'
+import { SlashCommand } from '../types/SlashCommand'
 
 export const search: SlashCommand = {
   name: '조회',

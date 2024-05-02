@@ -1,12 +1,11 @@
-import { ColorResolvable, EmbedBuilder } from 'discord.js'
-import { findChannel } from '../actions/db/channel/find'
-import { findRankStat } from '../actions/db/rankStat/find'
-import { findSummoner } from '../actions/db/summoner/find'
-import { dbConnect } from '../mongoose'
-import { SlashCommand } from '../types/SlashCommand'
-import { createChannel } from '../actions/db/channel/create'
+import { EmbedBuilder, ColorResolvable } from 'discord.js'
+import { createChannel, findChannel } from '../actions/channel.actions'
+import { findRankStat } from '../actions/rankStat.actions'
+import { findSummoner } from '../actions/summoner.actions'
 import { tierInfos } from '../constants/rank'
 import BaseError from '../errors/BaseError'
+import { dbConnect } from '../mongoose'
+import { SlashCommand } from '../types/SlashCommand'
 
 export const watchList: SlashCommand = {
   name: '워치리스트',
