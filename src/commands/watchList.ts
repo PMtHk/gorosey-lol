@@ -1,6 +1,6 @@
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
 import { findChannel } from '../actions/db/channel/find'
-import { findRankStat } from '../actions/db/rankstat/find'
+import { findRankStat } from '../actions/db/rankStat/find'
 import { findSummoner } from '../actions/db/summoner/find'
 import { dbConnect } from '../mongoose'
 import { SlashCommand } from '../types/SlashCommand'

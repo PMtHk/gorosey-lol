@@ -3,7 +3,7 @@ import cron from 'node-cron'
 import Channel from '../models/channel.model'
 import { dbConnect } from '../mongoose'
 
-import { findRankStat } from './db/rankstat/find'
+import { findRankStat } from './db/rankStat/find'
 import { findSummoner } from './db/summoner/find'
 import SearchEmbedBuilder, {
   SearchEmbedBuilderData,
