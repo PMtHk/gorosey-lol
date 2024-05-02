@@ -1,16 +1,16 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js'
-import { SlashCommand } from '../types/SlashCommand'
-import { createRankStat } from '../actions/db/rankStat/create'
-import { findRankStat } from '../actions/db/rankStat/find'
-import { createSummoner } from '../actions/db/summoner/create'
-import { findSummoner } from '../actions/db/summoner/find'
+import {
+  findChannel,
+  updateChannel,
+  createChannel,
+} from '../actions/channel.actions'
+import { findRankStat, createRankStat } from '../actions/rankStat.actions'
 import { fetchAccountDto } from '../actions/riot/fetchAccountDto'
 import { fetchLeagueStats } from '../actions/riot/fetchLeagueEntryDtos'
 import { fetchSummonerDto } from '../actions/riot/fetchSummonerDto'
-import { createChannel } from '../actions/db/channel/create'
-import { findChannel } from '../actions/db/channel/find'
-import { updateChannel } from '../actions/db/channel/update'
+import { findSummoner, createSummoner } from '../actions/summoner.actions'
 import BaseError from '../errors/BaseError'
+import { SlashCommand } from '../types/SlashCommand'
 
 export const register: SlashCommand = {
   name: '등록',
