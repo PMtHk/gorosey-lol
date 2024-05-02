@@ -8,7 +8,7 @@ export const createChannel = async (guildId: string, channelId: string) => {
 
     await Channel.create({
       _id: guildId,
-      channelId,
+      textChannel: channelId,
       watchList: [],
     })
   } catch (error) {
@@ -37,7 +37,7 @@ export const updateChannel = async (
     await dbConnect()
 
     await Channel.findByIdAndUpdate(guildId, {
-      ...(newChannelId && { channelId: newChannelId }),
+      ...(newChannelId && { textChannel: newChannelId }),
       watchList: newWatchList,
       lastUpdatedAt: Date.now(),
     })

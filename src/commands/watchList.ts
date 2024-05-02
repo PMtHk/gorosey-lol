@@ -6,6 +6,7 @@ import { tierInfos } from '../constants/rank'
 import BaseError from '../errors/BaseError'
 import { dbConnect } from '../mongoose'
 import { SlashCommand } from '../types/SlashCommand'
+import { elapsedTime } from '../utils/elapsedTime'
 
 export const watchList: SlashCommand = {
   name: '워치리스트',
@@ -130,15 +131,7 @@ export const watchList: SlashCommand = {
             },
           )
           .setFooter({
-            text: `최근 업데이트: ${new Date(lastUpdatedAt).toLocaleDateString(
-              'ko-KR',
-              {
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-              },
-            )}`,
+            text: `최근 업데이트: ${elapsedTime(+lastUpdatedAt)}`,
             iconURL: `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
           })
 
