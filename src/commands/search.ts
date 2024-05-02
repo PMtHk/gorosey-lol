@@ -24,7 +24,7 @@ import BaseError from '../errors/BaseError'
 
 export const search: SlashCommand = {
   name: '조회',
-  description: '소환사의 24시간 내 전적을 조회합니다. (솔로랭크, 자유랭크)',
+  description: '소환사의 랭크 정보 및 24시간 내 전적을 조회해요.',
   options: [
     {
       required: true,
@@ -108,6 +108,7 @@ export const search: SlashCommand = {
       const data: SearchEmbedBuilderData = {
         gameName,
         tagLine,
+        summonerLevel: summonerInfo.summonerLevel,
         profileIconId: summonerInfo.profileIconId,
         lastUpdatedAt: summonerInfo.lastUpdatedAt,
         RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,
@@ -190,6 +191,7 @@ export const search: SlashCommand = {
         const updatedData: SearchEmbedBuilderData = {
           gameName,
           tagLine,
+          summonerLevel: summonerInfo.summonerLevel,
           profileIconId: summonerInfo.profileIconId,
           lastUpdatedAt: summonerInfo.lastUpdatedAt,
           RANKED_SOLO_5x5: rankStatInfo.RANKED_SOLO_5x5,

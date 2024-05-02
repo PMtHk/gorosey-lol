@@ -1,5 +1,8 @@
 import mongoose from 'mongoose'
 import DBError from './errors/DBError'
+import * as dotenv from 'dotenv'
+
+dotenv.config()
 
 const { MONGODB_URI, MONGODB_DBNAME } = process.env
 

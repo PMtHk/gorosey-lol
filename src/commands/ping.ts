@@ -4,7 +4,7 @@ import BaseError from '../errors/BaseError'
 
 export const ping: SlashCommand = {
   name: '핑',
-  description: '퐁으로 응답합니다.',
+  description: '봇의 핑 수치를 확인할 수 있어요.',
   execute: async (
     _: Client<boolean>,
     interaction: CommandInteraction<CacheType>,

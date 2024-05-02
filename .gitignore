@@ -3,3 +3,6 @@
 
 # environments
 .env
+
+# build
+/dist

@@ -10,14 +10,15 @@ import BaseError from '../errors/BaseError'
 
 export const watchList: SlashCommand = {
   name: '워치리스트',
-  description: '워치리스트를 조회합니다.',
+  description: '이 채널의 워치리스트를 조회해요.',
   execute: async (_, interaction) => {
     try {
       await dbConnect()
 
-      // get guildId
+      // get guildId and channelId
       const guildId = interaction.guildId
       const guildName = interaction.guild?.name
+      const channelId = interaction.channelId
 
       // find channel from DB
       const channel = await findChannel(guildId)
@@ -25,7 +26,7 @@ export const watchList: SlashCommand = {
       // if channel is not found
       if (!channel) {
         // create new channel and reply with empty watchList
-        await createChannel(guildId)
+        await createChannel(guildId, channelId)
 
         await interaction.editReply({
           embeds: [

@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const channelSchema = new mongoose.Schema({
   _id: { type: String },
+  textChannel: { type: String, required: true },
   watchList: [
     {
       type: String,
