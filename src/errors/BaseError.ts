@@ -8,6 +8,10 @@ export default class BaseError extends Error {
     this.statusCode = statusCode
 
     Error.captureStackTrace(this, this.constructor)
+
+    console.log(
+      `[${new Date().toLocaleString()}] ${this.constructor.name}: ${this.message}`,
+    )
   }
 
   generateEmbed(): EmbedBuilder {

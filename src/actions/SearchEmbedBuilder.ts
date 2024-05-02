@@ -119,15 +119,7 @@ export default function SearchEmbedBuilder(data: SearchEmbedBuilderData) {
       { name: '\n', value: '\n' },
     )
     .setFooter({
-      text: `${gameName}#${tagLine} | ${lastUpdatedAt.toLocaleDateString(
-        'ko-KR',
-        {
-          month: 'long',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        },
-      )}에 갱신됨`,
+      text: `${gameName}#${tagLine} | ${elapsedTime(+lastUpdatedAt)}에 갱신됨`,
       iconURL: `https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/${profileIconId}.png`,
     })
 
