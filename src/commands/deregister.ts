@@ -13,7 +13,7 @@ import { updateChannel } from '../actions/db/channel/update'
 
 export const deregister: SlashCommand = {
   name: '해제',
-  description: '소환사를 워치리스트에서 제거합니다.',
+  description: '특정 소환사를 워치리스트에서 제거할 수 있어요.',
   execute: async (_, interaction) => {
     try {
       const guildId = interaction.guildId

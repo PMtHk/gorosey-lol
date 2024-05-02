@@ -10,7 +10,7 @@ import BaseError from '../errors/BaseError'
 
 export const watchList: SlashCommand = {
   name: '워치리스트',
-  description: '워치리스트를 조회합니다.',
+  description: '이 채널의 워치리스트를 조회해요.',
   execute: async (_, interaction) => {
     try {
       await dbConnect()

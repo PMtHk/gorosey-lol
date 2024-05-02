@@ -14,7 +14,7 @@ import BaseError from '../errors/BaseError'
 
 export const register: SlashCommand = {
   name: '등록',
-  description: '워치리스트에 소환사를 등록합니다.',
+  description: '워치리스트에 소환사를 등록해요. (최대 3개)',
   options: [
     {
       required: true,
