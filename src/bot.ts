@@ -65,4 +65,6 @@ client.on(Events.Error, (error) => {
   alertChannel.send(`[GOROSEY] ERROR: ${error.message}`)
 })
 
-client.login(DISCORD_TOKEN)
+export const initBot = () => {
+  client.login(DISCORD_TOKEN)
+}
