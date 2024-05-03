@@ -14,7 +14,7 @@ import { findSummoner } from './summoner.actions'
 
 export const startWatch = (client: Client<boolean>) => {
   cron.schedule(
-    '0 1,21,23 * * *',
+    '6 1 * * *',
     async () => {
       try {
         await dbConnect()
@@ -73,7 +73,7 @@ export const startWatch = (client: Client<boolean>) => {
           }
 
           if (embedsToSend.length > 0) {
-            targetChannel.send({
+            await targetChannel.send({
               embeds: embedsToSend,
             })
           }
