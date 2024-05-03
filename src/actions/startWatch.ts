@@ -23,6 +23,11 @@ export const startWatch = (client: Client<boolean>) => {
 
         for await (const channel of channels) {
           const { textChannel, watchList } = channel
+
+          if (!watchList || watchList.length === 0) {
+            continue
+          }
+
           const targetChannel = (await client.channels.fetch(
             textChannel,
           )) as TextChannel
@@ -67,9 +72,11 @@ export const startWatch = (client: Client<boolean>) => {
             embedsToSend.push(SearchEmbedBuilder(data))
           }
 
-          targetChannel.send({
-            embeds: embedsToSend,
-          })
+          if (embedsToSend.length > 0) {
+            targetChannel.send({
+              embeds: embedsToSend,
+            })
+          }
         }
       } catch (error) {
         console.log(error)
