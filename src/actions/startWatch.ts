@@ -14,7 +14,7 @@ import { findSummoner } from './summoner.actions'
 
 export const startWatch = (client: Client<boolean>) => {
   cron.schedule(
-    '6 1 * * *',
+    '0 18,21,24 * * *',
     async () => {
       try {
         await dbConnect()

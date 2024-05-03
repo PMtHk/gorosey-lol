@@ -141,6 +141,7 @@ export const watchList: SlashCommand = {
       const alertEmbed = new EmbedBuilder()
         .setColor('#FFCC65')
         .setTitle(`${guildName}의 고로시롤 워치리스트입니다.`)
+        .setDescription('18시, 21시, 24시에 워치리스트를 자동으로 조회합니다.')
 
       await interaction.editReply({
         embeds: [alertEmbed, ...embeds],
