@@ -76,7 +76,9 @@ export const deregister: SlashCommand = {
         ],
       })
 
-      const userInteraction = await response.createMessageComponentCollector({
+      let flag = true
+
+      const userInteraction = response.createMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         filter: (i) =>
           i.user.id === interaction.user.id && i.customId === interaction.id,
@@ -101,9 +103,15 @@ export const deregister: SlashCommand = {
           ],
           components: [],
         })
+
+        flag = false
+
+        userInteraction.stop()
       })
 
       userInteraction.on('end', async () => {
+        if (!flag) return
+
         await response.edit({
           embeds: [
             new EmbedBuilder()
