@@ -24,6 +24,18 @@ class RiotService {
     }
   }
 
+  public async fetchAccountByPuuid(riotPuuid: string): Promise<AccountDto> {
+    try {
+      const response = await riotInstance.asia.get<AccountDto>(
+        `/riot/account/v1/accounts/by-puuid/${riotPuuid}`,
+      )
+
+      return response.data
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
   public async fetchSummoner(riotPuuid: string) {
     try {
       const response = await riotInstance.kr.get(
