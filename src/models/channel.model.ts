@@ -1,6 +1,13 @@
 import mongoose from 'mongoose'
 
-const channelSchema = new mongoose.Schema({
+export interface IChannel {
+  _id: string
+  textChannel: string
+  watchList: string[]
+  lastUpdatedAt: Date
+}
+
+const channelSchema = new mongoose.Schema<IChannel>({
   // 디스코드 채널을 guild_id로 구분
   _id: { type: String },
 
@@ -18,7 +25,7 @@ let Channel = null
 if (mongoose.models.Channel !== undefined) {
   Channel = mongoose.models.Channel
 } else {
-  Channel = mongoose.model('Channel', channelSchema)
+  Channel = mongoose.model<IChannel>('Channel', channelSchema)
 }
 
 export default Channel

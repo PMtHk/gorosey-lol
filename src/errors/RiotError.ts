@@ -1,7 +1,7 @@
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
 import BaseError from './BaseError'
 
-export default class RiotAPIError extends BaseError {
+export default class RiotError extends BaseError {
   color: ColorResolvable
 
   title: string
@@ -11,8 +11,6 @@ export default class RiotAPIError extends BaseError {
   constructor(statusCode: number, message: string) {
     super(statusCode, message)
 
-    console.log('RiotAPIError', statusCode, message)
-
     this.color = '#FF0000' // danger
     this.title = '제가 조금 아파요!'
     this.description =
@@ -21,7 +19,7 @@ export default class RiotAPIError extends BaseError {
     if (statusCode >= 500) {
       this.title = '라이엇 API 서버가 아파요!'
       this.description =
-        '🛠️  잠시 라이엇 API 서버가 아파보여요. 잠시 후 다시 시도해주세요.'
+        '🛠️ 잠시 라이엇 서버가 아파보여요. 잠시 후 다시 시도해주세요.'
     }
 
     if (statusCode === 404) {

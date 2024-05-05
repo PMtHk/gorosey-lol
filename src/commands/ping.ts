@@ -23,6 +23,7 @@ export const ping: SlashCommand = {
         500,
         '[PING|SLASH COMMAND] unexpected error',
       )
+
       await interaction.editReply({
         embeds: [unexpectedError.generateEmbed()],
       })
