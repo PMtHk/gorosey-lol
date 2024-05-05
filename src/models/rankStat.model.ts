@@ -1,7 +1,10 @@
 import mongoose from 'mongoose'
 
 const rankStatSchema = new mongoose.Schema({
-  _id: { type: String }, // summonerId
+  // 랭크 정보는 summonerId로 불러올 수 있기 때문에
+  // summonerId를 _id로 사용
+  _id: { type: String },
+
   RANKED_SOLO_5x5: {
     leagueId: { type: String },
     tier: { type: String, default: 'UNRANKED' },
@@ -18,6 +21,7 @@ const rankStatSchema = new mongoose.Schema({
     wins: { type: Number, default: 0 },
     losses: { type: Number, default: 0 },
   },
+
   lastUpdatedAt: { type: Date, default: Date.now },
 })
 
