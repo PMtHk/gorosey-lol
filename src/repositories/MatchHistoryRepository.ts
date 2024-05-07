@@ -28,17 +28,15 @@ class MatchHistoryRepository {
     }
   }
 
-  public async read(
-    riotPuuid: string,
-    start?: number,
-  ): Promise<IMatchHistory[]> {
+  public async read(riotPuuid: string): Promise<IMatchHistory[]> {
     try {
       await dbConnect()
 
       const matchHistories = await MatchHistory.find({
         riotPuuid,
-        ...(start && { gameEndTimestamp: { $gte: start } }),
+        gameEndTimestamp: { $gte: Date.now() - 1000 * 60 * 60 * 24 * 3 },
       })
+        .limit(15)
         .sort({ gameEndTimestamp: -1 })
         .lean()
 
