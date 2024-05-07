@@ -36,7 +36,6 @@ export const register: SlashCommand = {
         embeds: [
           new EmbedBuilder()
             .setColor(colors.success)
-            .setTitle('등록 완료')
             .setDescription(
               `${gameName}#${tagLine}님이 워치리스트에 등록되었어요.`,
             ),
