@@ -58,14 +58,6 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
   }
 })
 
-client.on(Events.Error, (error) => {
-  const alertChannel = client.channels.cache.get(
-    ALERT_CHANNEL_CHAT_CHANNELID,
-  ) as TextChannel
-
-  alertChannel.send(`[GOROSEY] ERROR: ${error.message}`)
-})
-
 export const initBot = () => {
   client.login(DISCORD_TOKEN)
 }

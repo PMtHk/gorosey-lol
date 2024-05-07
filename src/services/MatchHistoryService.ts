@@ -21,8 +21,6 @@ class MatchHistoryService {
       'RANKED_FLEX_SR',
     )
 
-    console.log(soloMatchInfos)
-
     const matchInfos = soloMatchInfos.concat(flexMatchInfos)
 
     for await (const matchInfo of matchInfos) {

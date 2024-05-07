@@ -74,7 +74,6 @@ export const deregister: SlashCommand = {
         components: [],
       })
     } catch (error) {
-      console.log('error', error)
       if (error instanceof BaseError) {
         return await interaction.editReply({
           embeds: [error.generateEmbed()],
