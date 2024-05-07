@@ -32,6 +32,7 @@ class SummonerRepository {
       })
       return createdSummoner
     } catch (error) {
+      console.log(error)
       throw new DBError('새로운 소환사 생성 중 오류가 발생했습니다.')
     }
   }

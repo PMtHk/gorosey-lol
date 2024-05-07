@@ -31,8 +31,11 @@ class SummonerService {
   private async getRecentSummoner(riotPuuid: string) {
     const { gameName, tagLine } =
       await riotService.fetchAccountByPuuid(riotPuuid)
-    const { summonerId, summonerLevel, profileIconId } =
-      await riotService.fetchSummoner(riotPuuid)
+    const {
+      id: summonerId,
+      summonerLevel,
+      profileIconId,
+    } = await riotService.fetchSummoner(riotPuuid)
 
     return {
       riotPuuid,
