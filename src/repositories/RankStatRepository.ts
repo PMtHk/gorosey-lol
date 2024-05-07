@@ -1,5 +1,6 @@
 import DBError from '../errors/DBError'
 import RankStat, { IRankStat } from '../models/rankStat.model'
+import { dbConnect } from '../mongoose'
 
 class RankStatRepository {
   async create({
@@ -26,6 +27,8 @@ class RankStatRepository {
     } | null
   }): Promise<IRankStat> {
     try {
+      await dbConnect()
+
       const createdRankStat = await RankStat.create({
         _id: summonerId,
         RANKED_SOLO_5x5,
@@ -35,17 +38,19 @@ class RankStatRepository {
 
       return createdRankStat
     } catch (error) {
-      throw new DBError(500, '랭크 정보 생성 중 오류가 발생했습니다.')
+      throw new DBError('랭크 정보 생성 중 오류가 발생했습니다.')
     }
   }
 
   async read(summonerId: string): Promise<IRankStat> {
     try {
+      await dbConnect()
+
       const rankStat = await RankStat.findById(summonerId).lean()
 
       return rankStat
     } catch (error) {
-      throw new DBError(500, '랭크 정보 조회 중 오류가 발생했습니다.')
+      throw new DBError('랭크 정보 조회 중 오류가 발생했습니다.')
     }
   }
 
@@ -73,6 +78,8 @@ class RankStatRepository {
       } | null
     },
   ): Promise<IRankStat> {
+    await dbConnect()
+
     try {
       const updatedRankStat = await RankStat.findByIdAndUpdate(
         summonerId,
@@ -86,15 +93,17 @@ class RankStatRepository {
 
       return updatedRankStat
     } catch (error) {
-      throw new DBError(500, '랭크 정보 갱신 중 오류가 발생했습니다.')
+      throw new DBError('랭크 정보 갱신 중 오류가 발생했습니다.')
     }
   }
 
   async delete(summonerId: string): Promise<void> {
+    await dbConnect()
+
     try {
       await RankStat.findByIdAndDelete(summonerId)
     } catch (error) {
-      throw new DBError(500, '랭크 정보 삭제 중 오류가 발생했습니다.')
+      throw new DBError('랭크 정보 삭제 중 오류가 발생했습니다.')
     }
   }
 }

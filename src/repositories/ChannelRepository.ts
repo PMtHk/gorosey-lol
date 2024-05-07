@@ -1,9 +1,12 @@
 import Channel, { IChannel } from '../models/channel.model'
 import DBError from '../errors/DBError'
+import { dbConnect } from '../mongoose'
 
 class ChannelRepository {
   async create(guildId: string, channelId: string): Promise<IChannel> {
     try {
+      await dbConnect()
+
       const createdChannel = await Channel.create({
         _id: guildId,
         textChannel: channelId,
@@ -12,17 +15,19 @@ class ChannelRepository {
 
       return createdChannel
     } catch (error) {
-      throw new DBError(500, '새로운 채널 생성 중 오류가 발생했습니다.')
+      throw new DBError('새로운 채널 생성 중 오류가 발생했습니다.')
     }
   }
 
-  async find(guildId: string): Promise<IChannel> {
+  async read(guildId: string): Promise<IChannel> {
     try {
+      await dbConnect()
+
       const channel = await Channel.findById(guildId).lean()
 
       return channel
     } catch (error) {
-      throw new DBError(500, '채널 조회 중 오류가 발생했습니다.')
+      throw new DBError('채널 조회 중 오류가 발생했습니다.')
     }
   }
 
@@ -32,6 +37,8 @@ class ChannelRepository {
     newTextChannel?: string,
   ): Promise<IChannel> {
     try {
+      await dbConnect()
+
       const updatedChannel = await Channel.findByIdAndUpdate(
         guildId,
         {
@@ -44,28 +51,17 @@ class ChannelRepository {
 
       return updatedChannel
     } catch (error) {
-      throw new DBError(500, '채널 갱신 중 오류가 발생했습니다.')
+      throw new DBError('채널 갱신 중 오류가 발생했습니다.')
     }
   }
 
   async delete(guildId: string): Promise<void> {
+    await dbConnect()
+
     try {
       await Channel.findByIdAndDelete(guildId)
     } catch (error) {
-      throw new DBError(500, '채널 삭제 중 오류가 발생했습니다.')
-    }
-  }
-
-  async getWatchList(guildId: string): Promise<string[]> {
-    try {
-      const channel = await this.find(guildId)
-
-      return channel.watchList
-    } catch (error) {
-      throw new DBError(
-        500,
-        '감시 중인 소환사 목록 조회 중 오류가 발생했습니다.',
-      )
+      throw new DBError('채널 삭제 중 오류가 발생했습니다.')
     }
   }
 }

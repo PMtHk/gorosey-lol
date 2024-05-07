@@ -115,7 +115,7 @@ class RiotService {
       throw new RiotError(statusCode, message)
     }
 
-    throw new BaseError(500, '예기치 못한 오류가 발생했습니다.')
+    throw new BaseError(500)
   }
 }
 
