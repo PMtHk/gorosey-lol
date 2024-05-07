@@ -25,7 +25,7 @@ export const dbConnect = async () => {
 
     isConnected = true
   } catch (error) {
-    throw new DBError(500, 'dbConnect error')
+    throw new DBError('dbConnect error')
   }
 }
 
@@ -37,6 +37,6 @@ export const dbDisconnect = async () => {
 
     isConnected = false
   } catch (error) {
-    throw new DBError(500, 'dbDisconnect error')
+    throw new DBError('dbDisconnect error')
   }
 }
