@@ -1,4 +1,4 @@
-import { riotInstance } from '../apis/riotInstance'
+import { riotInstance } from '../utils/riotInstance'
 import BaseError from '../errors/BaseError'
 import RiotError from '../errors/RiotError'
 import {

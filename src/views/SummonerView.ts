@@ -8,5 +8,5 @@ export interface SummonerViewDto {
 }
 
 export default abstract class SummonerView {
-  abstract create(dto: SummonerViewDto): EmbedBuilder
+  abstract createEmbed(dto: SummonerViewDto): EmbedBuilder
 }

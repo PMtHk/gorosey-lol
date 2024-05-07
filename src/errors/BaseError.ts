@@ -1,4 +1,5 @@
 import { EmbedBuilder } from 'discord.js'
+import { colors } from '../constants/colors'
 
 export default class BaseError extends Error {
   code: number
@@ -19,7 +20,7 @@ export default class BaseError extends Error {
 
   generateEmbed(): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(this.code >= 500 ? '#FF0000' : '#FFA500')
+      .setColor(this.code >= 500 ? colors.error : colors.warning)
       .setDescription(`🛠️ ${this.message}`)
   }
 }

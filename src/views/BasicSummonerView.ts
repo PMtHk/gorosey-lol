@@ -6,7 +6,7 @@ import { elapsedTime } from '../utils/elapsedTime'
 import SummonerView, { SummonerViewDto } from './SummonerView'
 
 class BasicSummonerView implements SummonerView {
-  create(dto: SummonerViewDto) {
+  createEmbed(dto: SummonerViewDto) {
     const { summoner, rankStat } = dto
     const { gameName, tagLine, summonerLevel, profileIconId, lastUpdatedAt } =
       summoner

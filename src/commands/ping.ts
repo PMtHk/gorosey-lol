@@ -1,6 +1,7 @@
 import { CacheType, Client, CommandInteraction, EmbedBuilder } from 'discord.js'
 import { SlashCommand } from '../types/SlashCommand'
 import BaseError from '../errors/BaseError'
+import { colors } from '../constants/colors'
 
 export const ping: SlashCommand = {
   name: '핑',
@@ -10,22 +11,23 @@ export const ping: SlashCommand = {
     interaction: CommandInteraction<CacheType>,
   ) => {
     try {
-      await interaction.editReply({
+      return await interaction.editReply({
         embeds: [
           new EmbedBuilder()
-            .setColor('#0299FF')
+            .setColor(colors.primary)
             .setTitle(`🏓  ${interaction.client.ws.ping} ms`)
             .setTimestamp(),
         ],
       })
     } catch (error) {
-      const unexpectedError = new BaseError(
-        500,
-        '[PING|SLASH COMMAND] unexpected error',
-      )
+      if (error instanceof BaseError) {
+        return await interaction.editReply({
+          embeds: [error.generateEmbed()],
+        })
+      }
 
-      await interaction.editReply({
-        embeds: [unexpectedError.generateEmbed()],
+      return await interaction.editReply({
+        embeds: [new BaseError(500).generateEmbed()],
       })
     }
   },

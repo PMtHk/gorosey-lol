@@ -6,7 +6,7 @@ import {
   TextChannel,
 } from 'discord.js'
 import commands from './commands'
-import { startWatch } from './actions/startWatch'
+// import { startWatch } from './actions/startWatch'
 
 import * as dotenv from 'dotenv'
 
@@ -40,7 +40,7 @@ client.once(Events.ClientReady, async () => {
 
     alertChannel.send('[GOROSEY] BOT IS READY!')
 
-    startWatch(client)
+    // startWatch(client)
   }
 })
 

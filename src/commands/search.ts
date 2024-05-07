@@ -52,7 +52,7 @@ export const search: SlashCommand = {
       matchHistories = await matchHistoryService.read(riotPuuid)
 
       // views
-      replyEmbed = detailedSummonerView.create({
+      replyEmbed = detailedSummonerView.createEmbed({
         summoner,
         rankStat,
         matchHistories,
@@ -102,7 +102,7 @@ export const search: SlashCommand = {
         rankStat = await rankStatService.refresh(summonerId)
         matchHistories = await matchHistoryService.refresh(riotPuuid)
 
-        replyEmbed = detailedSummonerView.create({
+        replyEmbed = detailedSummonerView.createEmbed({
           summoner,
           rankStat,
           matchHistories,
@@ -114,6 +114,7 @@ export const search: SlashCommand = {
         })
       }
     } catch (error) {
+      console.log(error)
       if (error instanceof BaseError) {
         return await interaction.editReply({
           embeds: [error.generateEmbed()],
@@ -133,12 +134,7 @@ export const search: SlashCommand = {
       }
 
       return await interaction.editReply({
-        embeds: [
-          new BaseError(
-            500,
-            '[SEARCH|SLASH COMMAND] unexpected error',
-          ).generateEmbed(),
-        ],
+        embeds: [new BaseError(500).generateEmbed()],
       })
     }
   },

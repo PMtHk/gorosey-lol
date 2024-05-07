@@ -5,10 +5,12 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from 'discord.js'
-import { findChannel, updateChannel } from '../actions/channel.actions'
-import { fetchAccountDtoByPuuid } from '../actions/riot/fetchAccountDto'
 import BaseError from '../errors/BaseError'
+import { ISummoner } from '../models/summoner.model'
+import { channelService } from '../services/ChannelService'
+import { summonerService } from '../services/SummonerService'
 import { SlashCommand } from '../types/SlashCommand'
+import { colors } from '../constants/colors'
 
 export const deregister: SlashCommand = {
   name: '해제',
@@ -16,58 +18,33 @@ export const deregister: SlashCommand = {
   execute: async (_, interaction) => {
     try {
       const guildId = interaction.guildId
+      const watchList = await channelService.getWatchList(guildId)
 
-      // find channel from DB
-      const channel = await findChannel(guildId)
-
-      // if channel is not found
-      if (!channel || channel.watchList.length === 0) {
-        await interaction.editReply({
-          embeds: [
-            new EmbedBuilder()
-              .setColor('#FFCB64')
-              .setTitle('워치리스트')
-              .setDescription('워치리스트가 비어있어요.'),
-          ],
-        })
-
-        return
-      }
-
-      // with watchlist make select menu
+      // create view
       const descriptionEmbed = new EmbedBuilder()
-        .setColor('#FFCB64')
-        .setTitle('워치리스트')
-        .setDescription('제거할 소환사를 선택해주세요.')
-
-      const summonerInfos = []
-
-      for await (const puuid of channel.watchList) {
-        const { gameName, tagLine } = await fetchAccountDtoByPuuid(puuid)
-
-        summonerInfos.push({
-          label: `${gameName}#${tagLine}`,
-          puuid,
-        })
-      }
+        .setColor(colors.primary)
+        .setDescription('워치리스트에서 제거할 소환사를 선택해주세요.')
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId(interaction.id)
         .setPlaceholder('소환사를 선택해주세요.')
         .setMinValues(1)
         .setMaxValues(1)
-        .addOptions(
-          summonerInfos.map((summonerInfo) =>
-            new StringSelectMenuOptionBuilder()
-              .setLabel(summonerInfo.label)
-              .setValue(summonerInfo.puuid)
-              .setDescription(
-                `워치리스트에서 ${summonerInfo.label} 님을 제거합니다.`,
-              ),
-          ),
-        )
 
-      const response = await interaction.editReply({
+      for await (const puuid of watchList) {
+        const summoner: ISummoner = await summonerService.read(puuid)
+
+        selectMenu.addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setLabel(`${summoner.gameName}#${summoner.tagLine}`)
+            .setValue(summoner._id) // riotPuuid
+            .setDescription(
+              `워치리스트에서 ${summoner.gameName}#${summoner.tagLine} 님을 제거합니다.`,
+            ),
+        )
+      }
+
+      await interaction.editReply({
         embeds: [descriptionEmbed],
         components: [
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -76,67 +53,52 @@ export const deregister: SlashCommand = {
         ],
       })
 
-      let flag = true
-
-      const userInteraction = response.createMessageComponentCollector({
+      const userInteractions = await interaction.channel.awaitMessageComponent({
         componentType: ComponentType.StringSelect,
         filter: (i) =>
           i.user.id === interaction.user.id && i.customId === interaction.id,
-        time: 60_000,
+        time: 30_000,
       })
 
-      userInteraction.on('collect', async (i) => {
-        const puuid = i.values[0]
+      // remove selected summoner from watchlist
+      const targetRiotPuuid = userInteractions.values[0]
 
-        const newWatchList = channel.watchList.filter(
-          (id: string) => id !== puuid,
-        )
+      await channelService.removeFromWatchList(guildId, targetRiotPuuid)
 
-        await updateChannel(guildId, newWatchList)
-
-        await i.update({
-          embeds: [
-            new EmbedBuilder()
-              .setColor('#FFCB64')
-              .setTitle('제거 완료')
-              .setDescription('소환사가 제거되었습니다.'),
-          ],
-          components: [],
-        })
-
-        flag = false
-
-        userInteraction.stop()
-      })
-
-      userInteraction.on('end', async () => {
-        if (!flag) return
-
-        await response.edit({
-          embeds: [
-            new EmbedBuilder()
-              .setColor('#FFCB64')
-              .setTitle('시간 초과')
-              .setDescription('소환사를 선택하지 않아 해제 동작을 취소했어요!'),
-          ],
-          components: [],
-        })
+      await userInteractions.update({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(colors.success)
+            .setDescription('선택한 소환사를 워치리스트에서 해제했어요.'),
+        ],
+        components: [],
       })
     } catch (error) {
+      console.log('error', error)
       if (error instanceof BaseError) {
-        await interaction.editReply({
+        return await interaction.editReply({
           embeds: [error.generateEmbed()],
         })
-        return
       }
 
-      const unexpectedError = new BaseError(
-        500,
-        '[REGISTER|SLASH COMMAND] unexpected error',
-      )
+      // interaction timeout -> delete refresh button
+      if (
+        error.code === 'InteractionCollectorError' &&
+        error.message ===
+          'Collector received no interactions before ending with reason: time'
+      ) {
+        return await interaction.editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor(colors.warning)
+              .setDescription('시간 초과로 해제 동작을 취소했어요.'),
+          ],
+          components: [],
+        })
+      }
 
-      await interaction.editReply({
-        embeds: [unexpectedError.generateEmbed()],
+      return await interaction.editReply({
+        embeds: [new BaseError(500).generateEmbed()],
       })
     }
   },

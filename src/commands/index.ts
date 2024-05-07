@@ -5,6 +5,6 @@ import { register } from './register'
 import { search } from './search'
 import { watchList } from './watchList'
 
-const commands = [ping, search, watchList, register, deregister, guide]
+const commands = [ping, search, register, guide, deregister, watchList]
 
 export default commands

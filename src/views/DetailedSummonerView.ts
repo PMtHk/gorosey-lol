@@ -9,12 +9,12 @@ export interface DetailedSummonerViewDto extends SummonerViewDto {
 }
 
 class DetailedSummonerView implements SummonerView {
-  create(dto: DetailedSummonerViewDto) {
+  createEmbed(dto: DetailedSummonerViewDto) {
     const { summoner, rankStat, matchHistories } = dto
 
-    const embed = basicSummonerView.create({ summoner, rankStat })
+    const basicEmbed = basicSummonerView.createEmbed({ summoner, rankStat })
 
-    if (!matchHistories || matchHistories.length === 0) return embed
+    if (!matchHistories || matchHistories.length === 0) return basicEmbed
 
     let WIN_AND_TYPE = ''
     let CHAMPION = ''
@@ -43,7 +43,7 @@ class DetailedSummonerView implements SummonerView {
     })
 
     if (rankedGameCount > 0) {
-      embed.addFields({
+      basicEmbed.addFields({
         name: '랭크 게임 전적',
         value: `\`${rankedGameCount}전 ${rankedGameWinCount}승 ${rankedGameCount - rankedGameWinCount}패\` (${Math.round(
           (rankedGameWinCount / rankedGameCount) * 100,
@@ -51,7 +51,7 @@ class DetailedSummonerView implements SummonerView {
       })
     }
 
-    embed.addFields(
+    basicEmbed.addFields(
       {
         name: '최근 전적',
         value: WIN_AND_TYPE,
@@ -69,7 +69,7 @@ class DetailedSummonerView implements SummonerView {
       },
     )
 
-    return embed
+    return basicEmbed
   }
 }
 

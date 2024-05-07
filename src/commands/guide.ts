@@ -25,10 +25,7 @@ export const guide: SlashCommand = {
         return
       }
 
-      const unexpectedError = new BaseError(
-        500,
-        '[GUIDE|SLASH COMMAND] unexpected error',
-      )
+      const unexpectedError = new BaseError(500)
 
       await interaction.editReply({
         embeds: [unexpectedError.generateEmbed()],
