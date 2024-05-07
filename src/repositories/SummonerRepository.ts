@@ -42,22 +42,21 @@ class SummonerRepository {
     }
   }
 
-  async update(
-    riotPuuid: string,
-    {
-      gameName,
-      tagLine,
-      summonerId,
-      summonerLevel,
-      profileIconId,
-    }: {
-      gameName: string
-      tagLine: string
-      summonerId: string
-      summonerLevel: number
-      profileIconId: number
-    },
-  ): Promise<ISummoner> {
+  async update({
+    riotPuuid,
+    gameName,
+    tagLine,
+    summonerId,
+    summonerLevel,
+    profileIconId,
+  }: {
+    riotPuuid: string
+    gameName: string
+    tagLine: string
+    summonerId: string
+    summonerLevel: number
+    profileIconId: number
+  }): Promise<ISummoner> {
     try {
       const updatedSummoner = await Summoner.findByIdAndUpdate(
         riotPuuid,

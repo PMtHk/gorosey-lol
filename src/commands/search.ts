@@ -1,14 +1,22 @@
 import {
+  ActionRowBuilder,
   ApplicationCommandOptionType,
   ButtonBuilder,
   ButtonStyle,
-  ActionRowBuilder,
   ComponentType,
+  EmbedBuilder,
 } from 'discord.js'
 import BaseError from '../errors/BaseError'
+import { rankStatService } from '../services/RankStatService'
 import { riotService } from '../services/RiotService'
-import SummonerService from '../services/SummonerService'
+import { summonerService } from '../services/SummonerService'
 import { SlashCommand } from '../types/SlashCommand'
+
+import { matchHistoryService } from '../services/MatchHistoryService'
+import { detailedSummonerView } from '../views/DetailedSummonerView'
+import { ISummoner } from '../models/summoner.model'
+import { IRankStat } from '../models/rankStat.model'
+import { IMatchHistory } from '../models/matchHistory.model'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -22,6 +30,11 @@ export const search: SlashCommand = {
     },
   ],
   execute: async (_, interaction) => {
+    let summoner: ISummoner,
+      rankStat: IRankStat,
+      matchHistories: Array<IMatchHistory>,
+      replyEmbed: EmbedBuilder
+
     try {
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
@@ -31,19 +44,31 @@ export const search: SlashCommand = {
         inputTagLine || 'KR1',
       )
 
-      const targetSummoner = new SummonerService(riotPuuid)
-      await targetSummoner.init()
+      // services
+      summoner = await summonerService.read(riotPuuid)
+      const summonerId = summoner.summonerId
 
-      const response = await interaction.editReply({
-        embeds: [targetSummoner.buildEmbed()],
+      rankStat = await rankStatService.read(summonerId)
+      matchHistories = await matchHistoryService.read(riotPuuid)
+
+      // views
+      replyEmbed = detailedSummonerView.create({
+        summoner,
+        rankStat,
+        matchHistories,
+      })
+
+      // interaction button
+      const refreshButton = new ButtonBuilder()
+        .setCustomId('refresh')
+        .setLabel('전적 갱신하기')
+        .setStyle(ButtonStyle.Primary)
+
+      await interaction.editReply({
+        embeds: [replyEmbed],
         components: [
           new ActionRowBuilder<ButtonBuilder>({
-            components: [
-              new ButtonBuilder()
-                .setCustomId('refresh')
-                .setLabel('전적 갱신하기')
-                .setStyle(ButtonStyle.Primary),
-            ],
+            components: [refreshButton],
           }),
         ],
       })
@@ -52,9 +77,10 @@ export const search: SlashCommand = {
         .get(interaction.guildId)
         .members.cache.map((member) => member.user.id)
 
-      const userInteraction = await response.awaitMessageComponent({
+      const userInteraction = await interaction.channel?.awaitMessageComponent({
         componentType: ComponentType.Button,
         filter: (i) => guildMembers.includes(i.user.id),
+        time: 30_000, // 15 seconds
       })
 
       if (userInteraction.customId === 'refresh') {
@@ -72,28 +98,47 @@ export const search: SlashCommand = {
           ],
         })
 
-        await targetSummoner.refresh()
+        summoner = await summonerService.refresh(riotPuuid)
+        rankStat = await rankStatService.refresh(summonerId)
+        matchHistories = await matchHistoryService.refresh(riotPuuid)
+
+        replyEmbed = detailedSummonerView.create({
+          summoner,
+          rankStat,
+          matchHistories,
+        })
 
         await userInteraction.editReply({
-          embeds: [targetSummoner.buildEmbed()],
+          embeds: [replyEmbed],
           components: [],
         })
       }
     } catch (error) {
       if (error instanceof BaseError) {
-        await interaction.editReply({
+        return await interaction.editReply({
           embeds: [error.generateEmbed()],
         })
-        return
       }
 
-      const unexpectedError = new BaseError(
-        500,
-        '[SEARCH|SLASH COMMAND] unexpected error',
-      )
+      // interaction timeout -> delete refresh button
+      if (
+        error.code === 'InteractionCollectorError' &&
+        error.message ===
+          'Collector received no interactions before ending with reason: time'
+      ) {
+        return await interaction.editReply({
+          embeds: [replyEmbed],
+          components: [],
+        })
+      }
 
-      await interaction.editReply({
-        embeds: [unexpectedError.generateEmbed()],
+      return await interaction.editReply({
+        embeds: [
+          new BaseError(
+            500,
+            '[SEARCH|SLASH COMMAND] unexpected error',
+          ).generateEmbed(),
+        ],
       })
     }
   },
