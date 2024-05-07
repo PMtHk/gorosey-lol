@@ -3,7 +3,7 @@ import RankStat, { IRankStat } from '../models/rankStat.model'
 import { dbConnect } from '../mongoose'
 
 class RankStatRepository {
-  async create({
+  public async create({
     summonerId,
     RANKED_SOLO_5x5,
     RANKED_FLEX_SR,
@@ -42,7 +42,7 @@ class RankStatRepository {
     }
   }
 
-  async read(summonerId: string): Promise<IRankStat> {
+  public async read(summonerId: string): Promise<IRankStat> {
     try {
       await dbConnect()
 
@@ -54,7 +54,7 @@ class RankStatRepository {
     }
   }
 
-  async update(
+  public async update(
     summonerId: string,
     {
       RANKED_SOLO_5x5,
@@ -97,7 +97,7 @@ class RankStatRepository {
     }
   }
 
-  async delete(summonerId: string): Promise<void> {
+  public async delete(summonerId: string): Promise<void> {
     await dbConnect()
 
     try {

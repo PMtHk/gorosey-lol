@@ -3,7 +3,7 @@ import Summoner, { ISummoner } from '../models/summoner.model'
 import { dbConnect } from '../mongoose'
 
 class SummonerRepository {
-  async create({
+  public async create({
     riotPuuid,
     gameName,
     tagLine,
@@ -36,7 +36,7 @@ class SummonerRepository {
     }
   }
 
-  async read(riotPuuid: string): Promise<ISummoner> {
+  public async read(riotPuuid: string): Promise<ISummoner> {
     try {
       await dbConnect()
 
@@ -47,7 +47,7 @@ class SummonerRepository {
     }
   }
 
-  async update({
+  public async update({
     riotPuuid,
     gameName,
     tagLine,
@@ -83,7 +83,7 @@ class SummonerRepository {
     }
   }
 
-  async delete(riotPuuid: string): Promise<void> {
+  public async delete(riotPuuid: string): Promise<void> {
     try {
       await dbConnect()
 

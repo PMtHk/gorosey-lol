@@ -3,7 +3,7 @@ import DBError from '../errors/DBError'
 import { dbConnect } from '../mongoose'
 
 class ChannelRepository {
-  async create(guildId: string, channelId: string): Promise<IChannel> {
+  public async create(guildId: string, channelId: string): Promise<IChannel> {
     try {
       await dbConnect()
 
@@ -19,7 +19,7 @@ class ChannelRepository {
     }
   }
 
-  async read(guildId: string): Promise<IChannel> {
+  public async read(guildId: string): Promise<IChannel> {
     try {
       await dbConnect()
 
@@ -31,7 +31,7 @@ class ChannelRepository {
     }
   }
 
-  async update(
+  public async update(
     guildId: string,
     newWatchList: string[],
     newTextChannel?: string,
@@ -55,13 +55,25 @@ class ChannelRepository {
     }
   }
 
-  async delete(guildId: string): Promise<void> {
+  public async delete(guildId: string): Promise<void> {
     await dbConnect()
 
     try {
       await Channel.findByIdAndDelete(guildId)
     } catch (error) {
       throw new DBError('채널 삭제 중 오류가 발생했습니다.')
+    }
+  }
+
+  public async findAll(): Promise<IChannel[]> {
+    try {
+      await dbConnect()
+
+      const channels = await Channel.find({}).lean()
+
+      return channels
+    } catch (error) {
+      throw new DBError('채널 목록 조회 중 오류가 발생했습니다.')
     }
   }
 }

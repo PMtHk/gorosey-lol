@@ -3,7 +3,7 @@ import MatchHistory, { IMatchHistory } from '../models/matchHistory.model'
 import { dbConnect } from '../mongoose'
 
 class MatchHistoryRepository {
-  async create(matchHistory: {
+  public async create(matchHistory: {
     riotPuuid: string
     matchId: string
     assists: number
@@ -28,7 +28,10 @@ class MatchHistoryRepository {
     }
   }
 
-  async read(riotPuuid: string, start?: number): Promise<IMatchHistory[]> {
+  public async read(
+    riotPuuid: string,
+    start?: number,
+  ): Promise<IMatchHistory[]> {
     try {
       await dbConnect()
 
@@ -45,7 +48,10 @@ class MatchHistoryRepository {
     }
   }
 
-  async readOne(riotPuuid: string, matchId: string): Promise<IMatchHistory> {
+  public async readOne(
+    riotPuuid: string,
+    matchId: string,
+  ): Promise<IMatchHistory> {
     try {
       await dbConnect()
 
