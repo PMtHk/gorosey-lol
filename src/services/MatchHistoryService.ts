@@ -6,11 +6,7 @@ import { riotService } from './RiotService'
 
 class MatchHistoryService {
   public async read(riotPuuid: string): Promise<Array<IMatchHistory>> {
-    const matchHistories = await matchHistoryRepository.read(
-      riotPuuid,
-      Date.parse(new Date(new Date().setHours(0, 0, 0, 0)).toString()) -
-        60 * 60 * 24 * 3,
-    )
+    const matchHistories = await matchHistoryRepository.read(riotPuuid)
 
     return matchHistories
   }
@@ -24,6 +20,8 @@ class MatchHistoryService {
       riotPuuid,
       'RANKED_FLEX_SR',
     )
+
+    console.log(soloMatchInfos)
 
     const matchInfos = soloMatchInfos.concat(flexMatchInfos)
 
@@ -40,9 +38,9 @@ class MatchHistoryService {
     riotPuuid: string,
     type: 'RANKED_SOLO_5x5' | 'RANKED_FLEX_SR',
   ) {
-    const startTime = Date.parse(
-      new Date(new Date().setHours(0, 0, 0, 0)).toString(),
-    )
+    const startTime =
+      Date.parse(new Date(new Date().setHours(0, 0, 0, 0)).toString()) -
+      1000 * 60 * 60 * 24 * 3
 
     const gameType = {
       RANKED_SOLO_5x5: 420,
@@ -52,7 +50,7 @@ class MatchHistoryService {
     const matchInfos = []
 
     const matchIds = await riotService.fetchMatches(riotPuuid, {
-      startTime: startTime / 1000,
+      startTime: Math.round(startTime / 1000),
       queue: gameType[type],
       count: 100,
     })
@@ -68,9 +66,10 @@ class MatchHistoryService {
       const matchDto = await riotService.fetchMatchData(matchId)
       const infos = this.extractInfos(riotPuuid, matchDto)
 
-      infos.gameType = type
-
-      matchInfos.push(infos)
+      matchInfos.push({
+        ...infos,
+        gameType: type,
+      })
     }
 
     return matchInfos
