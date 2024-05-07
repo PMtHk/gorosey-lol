@@ -52,7 +52,6 @@ export const watchList: SlashCommand = {
         embeds: [descriptionEmbed, ...embeds],
       })
     } catch (error) {
-      console.log(error)
       if (error instanceof BaseError) {
         return await interaction.editReply({
           embeds: [error.generateEmbed()],
