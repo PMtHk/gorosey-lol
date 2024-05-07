@@ -123,16 +123,21 @@ export default class SummonerService {
       let rankedGameCount = 0
       let rankedGameWinCount = 0
 
-      this.matchHistoryService.matchHistories.forEach((match) => {
+      this.matchHistoryService.matchHistories.forEach((match, matchIndex) => {
         rankedGameCount++
 
         if (match.win) rankedGameWinCount++
 
-        const KDA = `${match.kills}/${match.deaths}/${match.assists}`
+        if (matchIndex < 10) {
+          const KDA = `${match.kills}/${match.deaths}/${match.assists}`
 
-        WIN_AND_TYPE += `${match.win ? '✅ 승' : '❌ 패'} ${match.gameType}\n`
-        CHAMPION += `${champions[match.championName]}\n`
-        KDA_AND_TIME += `${KDA.padEnd(12, '\u00A0')} (${elapsedTime(match.gameEndTimestamp)})\n`
+          const gameType =
+            match.gameType === 'RANKED_SOLO_5x5' ? '개인/2인 랭크' : '자유 랭크'
+
+          WIN_AND_TYPE += `${match.win ? '✅ 승' : '❌ 패'} ${gameType}\n`
+          CHAMPION += `${champions[match.championName]}\n`
+          KDA_AND_TIME += `${KDA.padEnd(12, '\u00A0')} (${elapsedTime(match.gameEndTimestamp)})\n`
+        }
       })
 
       if (rankedGameCount > 0) {
@@ -146,7 +151,7 @@ export default class SummonerService {
 
       embed.addFields(
         {
-          name: '최근 전적',
+          name: '최근 전적(최대 10개)',
           value: WIN_AND_TYPE,
           inline: true,
         },

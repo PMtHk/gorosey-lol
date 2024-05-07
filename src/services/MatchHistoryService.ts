@@ -15,23 +15,19 @@ export default class MatchHistoryService {
 
   // 하루동안의 매치 히스토리를 불러와 DB에 저장
   async refresh(): Promise<void> {
-    const startTime = Math.round(new Date().setHours(0, 0, 0, 0) / 1000)
+    const startTime = Date.parse(
+      new Date(new Date().setHours(0, 0, 0, 0)).toString(),
+    )
 
+    // 개인/2인 랭크(420)게임 갱신
     const MATCHES_420 = await riotService.fetchMatches(this.riotPuuid, {
-      startTime,
-      queue: 25, // 개인/2인 랭크 게임
+      startTime: startTime / 1000,
+      // epochTime이지만, millisecond 단위가 아닌 second 단위로 변환해야 함
+      queue: 420,
       count: 100,
     })
 
-    const MATCHES_440 = await riotService.fetchMatches(this.riotPuuid, {
-      startTime,
-      queue: 420, // 솔로 랭크 게임
-      count: 100,
-    })
-
-    const matchIds = [...MATCHES_420, ...MATCHES_440]
-
-    for await (const matchId of matchIds) {
+    for await (const matchId of MATCHES_420) {
       const alreadyExist = await matchHistoryRepository.readOne(
         this.riotPuuid,
         matchId,
@@ -40,20 +36,51 @@ export default class MatchHistoryService {
       if (alreadyExist) continue
 
       const matchDto = await riotService.fetchMatchData(matchId)
-
       const createdHistory = await matchHistoryRepository.create({
         riotPuuid: this.riotPuuid,
         matchId,
         ...this.extractInfos(matchDto),
+        gameType: 'RANKED_SOLO_5x5',
       })
 
       this.matchHistories.push(createdHistory)
     }
+
+    // 자유 랭크(440)게임 갱신
+    const MATCHES_440 = await riotService.fetchMatches(this.riotPuuid, {
+      startTime,
+      queue: 440,
+      count: 100,
+    })
+
+    for await (const matchId of MATCHES_440) {
+      const alreadyExist = await matchHistoryRepository.readOne(
+        this.riotPuuid,
+        matchId,
+      )
+
+      if (alreadyExist) continue
+
+      const matchDto = await riotService.fetchMatchData(matchId)
+      const createdHistory = await matchHistoryRepository.create({
+        riotPuuid: this.riotPuuid,
+        matchId,
+        ...this.extractInfos(matchDto),
+        gameType: 'RANKED_FLEX_SR',
+      })
+
+      this.matchHistories.push(createdHistory)
+    }
+
+    this.matchHistories.sort((a, b) => b.gameEndTimestamp - a.gameEndTimestamp)
   }
 
   // 하루동안의 매치 히스토리를 불러옴
   async read(): Promise<void> {
-    const matchHistories = await matchHistoryRepository.read(this.riotPuuid)
+    const matchHistories = await matchHistoryRepository.read(
+      this.riotPuuid,
+      Date.parse(new Date(new Date().setHours(0, 0, 0, 0)).toString()),
+    )
 
     this.matchHistories = matchHistories
   }
