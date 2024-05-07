@@ -13,9 +13,9 @@ export const guide: SlashCommand = {
 
       await interaction.editReply({
         content:
-          '현재 고로시롤에서 사용 가능한 명령어는 다음과 같습니다.\n\n' +
+          '현재 고로시롤에서 사용 가능한 명령어에요.\n\n' +
           commandMessages.join('') +
-          '\n(KR 지역의 소환사 정보만 제공합니다.)',
+          '\n(KR 지역의 소환사 정보만 제공하고 있어요.)',
       })
     } catch (error) {
       if (error instanceof BaseError) {

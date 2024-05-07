@@ -35,7 +35,7 @@ class BasicSummonerView implements SummonerView {
       .setThumbnail(
         `http://ddragon.leagueoflegends.com/cdn/${PATCH_VERSION}/img/profileicon/${profileIconId}.png`,
       )
-      .setDescription('랭크게임 정보를 조회합니다.')
+      .setDescription('랭크게임 정보를 조회해요!')
       .addFields(
         { name: '\n', value: '\n' },
         {

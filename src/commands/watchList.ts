@@ -22,7 +22,7 @@ export const watchList: SlashCommand = {
           embeds: [
             new EmbedBuilder()
               .setColor(colors.warning)
-              .setDescription('워치리스트가 비어있습니다.'),
+              .setDescription('워치리스트가 비어있어요.'),
           ],
         })
       }
@@ -43,15 +43,16 @@ export const watchList: SlashCommand = {
       }
 
       const descriptionEmbed = new EmbedBuilder()
-        .setColor(colors.secondary)
+        .setColor(colors.success)
         .setDescription(
-          `\`${guildName}\` 채널의 워치리스트입니다.\n워치리스트 내 소환사는 자동으로 갱신 및 조회가 됩니다.`,
+          `\`${guildName}\` 채널의 워치리스트에요.\n워치리스트 내 소환사는 자동으로 갱신 및 조회가 이루어져요.`,
         )
 
       await interaction.editReply({
         embeds: [descriptionEmbed, ...embeds],
       })
     } catch (error) {
+      console.log(error)
       if (error instanceof BaseError) {
         return await interaction.editReply({
           embeds: [error.generateEmbed()],

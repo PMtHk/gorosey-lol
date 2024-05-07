@@ -39,7 +39,7 @@ export const deregister: SlashCommand = {
             .setLabel(`${summoner.gameName}#${summoner.tagLine}`)
             .setValue(summoner._id) // riotPuuid
             .setDescription(
-              `워치리스트에서 ${summoner.gameName}#${summoner.tagLine} 님을 제거합니다.`,
+              `워치리스트에서 ${summoner.gameName}#${summoner.tagLine} 님을 제거해요.`,
             ),
         )
       }

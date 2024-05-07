@@ -31,16 +31,13 @@ class ChannelService {
     }
 
     if (channel.watchList.includes(riotPuuidToAdd)) {
-      throw new BaseError(
-        400,
-        '이 채널의 워치리스트에 이미 등록된 소환사입니다.',
-      )
+      throw new BaseError(400, '이미 등록된 소환사에요!')
     }
 
     if (channel.watchList.length >= 3) {
       throw new BaseError(
         400,
-        '이 채널의 워치리스트는 이미 꽉 찼습니다.\n최대 3개까지 등록하실 수 있습니다.)',
+        '워치리스트가 가득찼어요! 최대 3명까지 등록할 수 있어요.',
       )
     }
 
@@ -58,11 +55,11 @@ class ChannelService {
     const channel: IChannel = await channelRepository.read(guildId)
 
     if (!channel || channel.watchList.length === 0) {
-      throw new BaseError(400, '이 채널의 워치리스트는 비어있습니다.')
+      throw new BaseError(400, '워치리스트가 비어있어요!')
     }
 
     if (!channel.watchList.includes(riotPuuidToRemove)) {
-      throw new BaseError(400, '이 채널의 워치리스트에 해당 소환사가 없습니다.')
+      throw new BaseError(400, '잘못된 접근이에요!')
     }
 
     const newWatchList = channel.watchList.filter(

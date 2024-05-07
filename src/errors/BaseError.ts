@@ -21,6 +21,6 @@ export default class BaseError extends Error {
   generateEmbed(): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(this.code >= 500 ? colors.error : colors.warning)
-      .setDescription(`🛠️ ${this.message}`)
+      .setDescription(this.message)
   }
 }
