@@ -73,6 +73,12 @@ class ChannelService {
 
     return updatedChannel.watchList
   }
+
+  public async getAllChannels(): Promise<Array<IChannel>> {
+    const channels = await channelRepository.findAll()
+
+    return channels
+  }
 }
 
 export const channelService = new ChannelService()

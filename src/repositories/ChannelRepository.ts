@@ -56,9 +56,9 @@ class ChannelRepository {
   }
 
   public async delete(guildId: string): Promise<void> {
-    await dbConnect()
-
     try {
+      await dbConnect()
+
       await Channel.findByIdAndDelete(guildId)
     } catch (error) {
       throw new DBError('채널 삭제 중 오류가 발생했습니다.')

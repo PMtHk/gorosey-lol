@@ -9,6 +9,7 @@ import commands from './commands'
 // import { startWatch } from './actions/startWatch'
 
 import * as dotenv from 'dotenv'
+import { startWatch } from './temps/startWatch'
 
 dotenv.config()
 
@@ -38,9 +39,9 @@ client.once(Events.ClientReady, async () => {
       ALERT_CHANNEL_CHAT_CHANNELID,
     ) as TextChannel
 
-    alertChannel.send('[GOROSEY] BOT IS READY!')
+    startWatch(client)
 
-    // startWatch(client)
+    alertChannel.send('고로시롤이 준비되었습니다!')
   }
 })
 
