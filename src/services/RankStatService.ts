@@ -10,7 +10,6 @@ class RankStatService {
     const rankStat = await rankStatRepository.read(summonerId)
 
     if (!rankStat) {
-      // do something
       const { solos, flexes } = await this.getRecentRankStat(summonerId)
 
       const createdRankStat = await rankStatRepository.create({

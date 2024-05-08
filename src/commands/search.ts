@@ -1,22 +1,22 @@
 import {
-  ActionRowBuilder,
   ApplicationCommandOptionType,
+  EmbedBuilder,
   ButtonBuilder,
   ButtonStyle,
+  ActionRowBuilder,
   ComponentType,
-  EmbedBuilder,
 } from 'discord.js'
-import BaseError from '../errors/BaseError'
+import { CustomError } from '../errors/CustomError'
+import { UnexpectedError } from '../errors/UnexpectedError'
+import { IMatchHistory } from '../models/matchHistory.model'
+import { IRankStat } from '../models/rankStat.model'
+import { ISummoner } from '../models/summoner.model'
+import { matchHistoryService } from '../services/MatchHistoryService'
 import { rankStatService } from '../services/RankStatService'
 import { riotService } from '../services/RiotService'
 import { summonerService } from '../services/SummonerService'
 import { SlashCommand } from '../types/SlashCommand'
-
-import { matchHistoryService } from '../services/MatchHistoryService'
 import { detailedSummonerView } from '../views/DetailedSummonerView'
-import { ISummoner } from '../models/summoner.model'
-import { IRankStat } from '../models/rankStat.model'
-import { IMatchHistory } from '../models/matchHistory.model'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -114,9 +114,9 @@ export const search: SlashCommand = {
         })
       }
     } catch (error) {
-      if (error instanceof BaseError) {
+      if (error instanceof CustomError) {
         return await interaction.editReply({
-          embeds: [error.generateEmbed()],
+          embeds: [error.createErrorEmbed()],
         })
       }
 
@@ -125,15 +125,14 @@ export const search: SlashCommand = {
         error.code === 'InteractionCollectorError' &&
         error.message ===
           'Collector received no interactions before ending with reason: time'
-      ) {
+      )
         return await interaction.editReply({
           embeds: [replyEmbed],
           components: [],
         })
-      }
 
       return await interaction.editReply({
-        embeds: [new BaseError(500).generateEmbed()],
+        embeds: [new UnexpectedError(error.message).createErrorEmbed()],
       })
     }
   },

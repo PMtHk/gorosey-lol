@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js'
-import BaseError from '../errors/BaseError'
+import { COLORS } from '../constants/colors'
+import { CustomError } from '../errors/CustomError'
+import { UnexpectedError } from '../errors/UnexpectedError'
 import { channelService } from '../services/ChannelService'
-import { SlashCommand } from '../types/SlashCommand'
 import { riotService } from '../services/RiotService'
-import { colors } from '../constants/colors'
+import { SlashCommand } from '../types/SlashCommand'
 
 export const register: SlashCommand = {
   name: '등록',
@@ -35,21 +36,20 @@ export const register: SlashCommand = {
       await interaction.editReply({
         embeds: [
           new EmbedBuilder()
-            .setColor(colors.success)
+            .setColor(COLORS.embedColor.success)
             .setDescription(
               `${gameName}#${tagLine}님이 워치리스트에 등록되었어요.`,
             ),
         ],
       })
     } catch (error) {
-      if (error instanceof BaseError) {
+      if (error instanceof CustomError)
         return await interaction.editReply({
-          embeds: [error.generateEmbed()],
+          embeds: [error.createErrorEmbed()],
         })
-      }
 
       return await interaction.editReply({
-        embeds: [new BaseError(500).generateEmbed()],
+        embeds: [new UnexpectedError(error.message).createErrorEmbed()],
       })
     }
   },

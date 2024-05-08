@@ -1,11 +1,12 @@
 import { EmbedBuilder } from 'discord.js'
+import { COLORS } from '../constants/colors'
+import { CustomError } from '../errors/CustomError'
+import { UnexpectedError } from '../errors/UnexpectedError'
 import { channelService } from '../services/ChannelService'
-import { SlashCommand } from '../types/SlashCommand'
-import { summonerService } from '../services/SummonerService'
-import { basicSummonerView } from '../views/BasicSummonerView'
 import { rankStatService } from '../services/RankStatService'
-import BaseError from '../errors/BaseError'
-import { colors } from '../constants/colors'
+import { summonerService } from '../services/SummonerService'
+import { SlashCommand } from '../types/SlashCommand'
+import { basicSummonerView } from '../views/BasicSummonerView'
 
 export const watchList: SlashCommand = {
   name: '워치리스트',
@@ -21,7 +22,7 @@ export const watchList: SlashCommand = {
         return await interaction.editReply({
           embeds: [
             new EmbedBuilder()
-              .setColor(colors.warning)
+              .setColor(COLORS.embedColor.warning)
               .setDescription('워치리스트가 비어있어요.'),
           ],
         })
@@ -43,7 +44,7 @@ export const watchList: SlashCommand = {
       }
 
       const descriptionEmbed = new EmbedBuilder()
-        .setColor(colors.success)
+        .setColor(COLORS.embedColor.success)
         .setDescription(
           `\`${guildName}\` 채널의 워치리스트에요.\n워치리스트 내 소환사는 자동으로 갱신 및 조회가 이루어져요.`,
         )
@@ -52,14 +53,13 @@ export const watchList: SlashCommand = {
         embeds: [descriptionEmbed, ...embeds],
       })
     } catch (error) {
-      if (error instanceof BaseError) {
+      if (error instanceof CustomError)
         return await interaction.editReply({
-          embeds: [error.generateEmbed()],
+          embeds: [error.createErrorEmbed()],
         })
-      }
 
       return await interaction.editReply({
-        embeds: [new BaseError(500).generateEmbed()],
+        embeds: [new UnexpectedError(error.message).createErrorEmbed()],
       })
     }
   },

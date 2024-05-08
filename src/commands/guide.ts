@@ -1,5 +1,6 @@
 import commands from '.'
-import BaseError from '../errors/BaseError'
+import { CustomError } from '../errors/CustomError'
+import { UnexpectedError } from '../errors/UnexpectedError'
 import { SlashCommand } from '../types/SlashCommand'
 
 export const guide: SlashCommand = {
@@ -18,17 +19,13 @@ export const guide: SlashCommand = {
           '\n(KR 지역의 소환사 정보만 제공하고 있어요.)',
       })
     } catch (error) {
-      if (error instanceof BaseError) {
-        await interaction.editReply({
-          embeds: [error.generateEmbed()],
+      if (error instanceof CustomError)
+        return await interaction.editReply({
+          embeds: [error.createErrorEmbed()],
         })
-        return
-      }
 
-      const unexpectedError = new BaseError(500)
-
-      await interaction.editReply({
-        embeds: [unexpectedError.generateEmbed()],
+      return await interaction.editReply({
+        embeds: [new UnexpectedError(error.message).createErrorEmbed()],
       })
     }
   },

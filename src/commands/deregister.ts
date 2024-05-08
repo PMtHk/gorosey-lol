@@ -5,12 +5,13 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from 'discord.js'
-import BaseError from '../errors/BaseError'
 import { ISummoner } from '../models/summoner.model'
 import { channelService } from '../services/ChannelService'
 import { summonerService } from '../services/SummonerService'
 import { SlashCommand } from '../types/SlashCommand'
-import { colors } from '../constants/colors'
+import { COLORS } from '../constants/colors'
+import { CustomError } from '../errors/CustomError'
+import { UnexpectedError } from '../errors/UnexpectedError'
 
 export const deregister: SlashCommand = {
   name: '해제',
@@ -22,7 +23,7 @@ export const deregister: SlashCommand = {
 
       // create view
       const descriptionEmbed = new EmbedBuilder()
-        .setColor(colors.primary)
+        .setColor(COLORS.embedColor.primary)
         .setDescription('워치리스트에서 제거할 소환사를 선택해주세요.')
 
       const selectMenu = new StringSelectMenuBuilder()
@@ -68,19 +69,19 @@ export const deregister: SlashCommand = {
       await userInteractions.update({
         embeds: [
           new EmbedBuilder()
-            .setColor(colors.success)
+            .setColor(COLORS.embedColor.success)
             .setDescription('선택한 소환사를 워치리스트에서 해제했어요.'),
         ],
         components: [],
       })
     } catch (error) {
-      if (error instanceof BaseError) {
+      if (error instanceof CustomError) {
         return await interaction.editReply({
-          embeds: [error.generateEmbed()],
+          embeds: [error.createErrorEmbed()],
         })
       }
 
-      // interaction timeout -> delete refresh button
+      // interaction timeout
       if (
         error.code === 'InteractionCollectorError' &&
         error.message ===
@@ -89,7 +90,7 @@ export const deregister: SlashCommand = {
         return await interaction.editReply({
           embeds: [
             new EmbedBuilder()
-              .setColor(colors.warning)
+              .setColor(COLORS.embedColor.warning)
               .setDescription('시간 초과로 해제 동작을 취소했어요.'),
           ],
           components: [],
@@ -97,7 +98,7 @@ export const deregister: SlashCommand = {
       }
 
       return await interaction.editReply({
-        embeds: [new BaseError(500).generateEmbed()],
+        embeds: [new UnexpectedError(error.message).createErrorEmbed()],
       })
     }
   },

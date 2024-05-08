@@ -1,5 +1,5 @@
+import { DatabaseError } from '../errors/DatabaseError'
 import Channel, { IChannel } from '../models/channel.model'
-import DBError from '../errors/DBError'
 import { dbConnect } from '../mongoose'
 
 class ChannelRepository {
@@ -15,7 +15,9 @@ class ChannelRepository {
 
       return createdChannel
     } catch (error) {
-      throw new DBError('새로운 채널 생성 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'ChannelRepository.create() error: ' + error.message,
+      )
     }
   }
 
@@ -27,7 +29,9 @@ class ChannelRepository {
 
       return channel
     } catch (error) {
-      throw new DBError('채널 조회 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'ChannelRepository.read() error: ' + error.message,
+      )
     }
   }
 
@@ -51,7 +55,9 @@ class ChannelRepository {
 
       return updatedChannel
     } catch (error) {
-      throw new DBError('채널 갱신 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'ChannelRepository.update() error: ' + error.message,
+      )
     }
   }
 
@@ -59,9 +65,13 @@ class ChannelRepository {
     try {
       await dbConnect()
 
-      await Channel.findByIdAndDelete(guildId)
+      const deletedCahnnel = await Channel.findByIdAndDelete(guildId)
+
+      return deletedCahnnel
     } catch (error) {
-      throw new DBError('채널 삭제 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'ChannelRepository.delete() error: ' + error.message,
+      )
     }
   }
 
@@ -73,7 +83,9 @@ class ChannelRepository {
 
       return channels
     } catch (error) {
-      throw new DBError('채널 목록 조회 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'ChannelRepository.findAll() error: ' + error.message,
+      )
     }
   }
 }

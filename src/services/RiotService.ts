@@ -1,12 +1,15 @@
 import { riotInstance } from '../utils/riotInstance'
-import BaseError from '../errors/BaseError'
-import RiotError from '../errors/RiotError'
 import {
   AccountDto,
   LeagueEntryDto,
   MatchDto,
   MatchesDto,
+  SummonerDto,
 } from '../types/riot.dtos'
+import { RiotAPIError } from '../errors/RiotAPIError'
+import { SummonerNotFoundError } from '../errors/NotFoundError'
+import { BadRequestError } from '../errors/BadReqeustError'
+import { UnexpectedError } from '../errors/UnexpectedError'
 
 class RiotService {
   public async fetchAccount(
@@ -36,7 +39,7 @@ class RiotService {
     }
   }
 
-  public async fetchSummoner(riotPuuid: string) {
+  public async fetchSummoner(riotPuuid: string): Promise<SummonerDto> {
     try {
       const response = await riotInstance.kr.get(
         `/lol/summoner/v4/summoners/by-puuid/${riotPuuid}`,
@@ -112,10 +115,13 @@ class RiotService {
         status: { message, status_code: statusCode },
       } = error.response.data
 
-      throw new RiotError(statusCode, message)
+      if (statusCode >= 500) throw new RiotAPIError(message)
+      if (statusCode === 404) throw new SummonerNotFoundError(message)
+
+      throw new BadRequestError(message)
     }
 
-    throw new BaseError(500)
+    throw new UnexpectedError(error.message)
   }
 }
 

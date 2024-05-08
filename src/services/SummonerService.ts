@@ -22,7 +22,6 @@ class SummonerService {
 
   public async refresh(riotPuuid: string) {
     const fetchedSummonerInfo = await this.getRecentSummoner(riotPuuid)
-
     const updatedSummoner = await summonerRepository.update(fetchedSummonerInfo)
 
     return updatedSummoner
