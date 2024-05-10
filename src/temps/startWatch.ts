@@ -9,7 +9,7 @@ import { detailedSummonerView } from '../views/DetailedSummonerView'
 
 export const startWatch = (client: Client<boolean>) => {
   cron.schedule(
-    '0 0,12, * * *',
+    '0 0,12 * * *',
     async () => {
       try {
         const channels: Array<IChannel> = await channelService.getAllChannels()
