@@ -58,6 +58,14 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
   }
 })
 
+client.on(Events.ChannelCreate, async (channel) => {
+  console.log('channel created', channel)
+})
+
+client.on(Events.ChannelDelete, async (channel) => {
+  console.log('channel deleted', channel)
+})
+
 export const initBot = () => {
   client.login(DISCORD_TOKEN)
 }
