@@ -1,11 +1,14 @@
-import {
-  CommandInteraction,
-  ChatInputApplicationCommandData,
-  Client,
-} from 'discord.js'
+import { CommandInteraction, ChatInputApplicationCommandData } from 'discord.js'
 
 export type SlashCommand = ChatInputApplicationCommandData & {
   name: string
   description: string
-  execute: (client: Client, interaction: CommandInteraction) => void
+  // locales?: {
+  //   [key: string]: {
+  //     name: string
+  //     description: string
+  //     options?: ChatInputApplicationCommandData['options']
+  //   }
+  // }
+  execute: (interaction: CommandInteraction) => void
 }

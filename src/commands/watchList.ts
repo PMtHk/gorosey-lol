@@ -11,7 +11,7 @@ import { basicSummonerView } from '../views/BasicSummonerView'
 export const watchList: SlashCommand = {
   name: '워치리스트',
   description: '이 채널의 워치리스트를 조회해요.',
-  execute: async (_, interaction) => {
+  execute: async (interaction) => {
     try {
       const guildId = interaction.guildId
       const guildName = interaction.guild?.name

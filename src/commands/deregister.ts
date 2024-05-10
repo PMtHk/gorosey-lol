@@ -16,7 +16,7 @@ import { UnexpectedError } from '../errors/UnexpectedError'
 export const deregister: SlashCommand = {
   name: '해제',
   description: '특정 소환사를 워치리스트에서 제거할 수 있어요.',
-  execute: async (_, interaction) => {
+  execute: async (interaction) => {
     try {
       const guildId = interaction.guildId
       const watchList = await channelService.getWatchList(guildId)

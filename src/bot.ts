@@ -1,15 +1,7 @@
-import {
-  Client,
-  Events,
-  GatewayIntentBits,
-  Interaction,
-  TextChannel,
-} from 'discord.js'
-import commands from './commands'
-// import { startWatch } from './actions/startWatch'
-
 import * as dotenv from 'dotenv'
-import { startWatch } from './temps/startWatch'
+import { Client, Events, GatewayIntentBits } from 'discord.js'
+import slashCommandHandler from './utils/interactionListener'
+import clientReadyListener from './utils/clilentReadyListener'
 
 dotenv.config()
 
@@ -28,43 +20,9 @@ const client = new Client({
   intents: [Guilds, GuildMessages, MessageContent],
 })
 
-client.once(Events.ClientReady, async () => {
-  if (client.application) {
-    // create commands
-    for await (const command of commands) {
-      await client.application.commands.create(command)
-    }
+client.once(Events.ClientReady, clientReadyListener)
 
-    const alertChannel = client.channels.cache.get(
-      ALERT_CHANNEL_CHAT_CHANNELID,
-    ) as TextChannel
-
-    startWatch(client)
-
-    alertChannel.send('고로시롤이 준비되었습니다!')
-  }
-})
-
-client.on(Events.InteractionCreate, async (interaction: Interaction) => {
-  if (interaction.isCommand()) {
-    const command = commands.find(
-      ({ name }) => name === interaction.commandName,
-    )
-
-    if (command) {
-      await interaction.deferReply()
-      command.execute(client, interaction)
-    }
-  }
-})
-
-client.on(Events.ChannelCreate, async (channel) => {
-  console.log('channel created', channel)
-})
-
-client.on(Events.ChannelDelete, async (channel) => {
-  console.log('channel deleted', channel)
-})
+client.on(Events.InteractionCreate, slashCommandHandler)
 
 export const initBot = () => {
   client.login(DISCORD_TOKEN)

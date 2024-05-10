@@ -1,4 +1,4 @@
-import { CacheType, Client, CommandInteraction, EmbedBuilder } from 'discord.js'
+import { EmbedBuilder } from 'discord.js'
 import { SlashCommand } from '../types/SlashCommand'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
@@ -7,10 +7,7 @@ import { UnexpectedError } from '../errors/UnexpectedError'
 export const ping: SlashCommand = {
   name: '핑',
   description: '봇의 핑 수치를 확인할 수 있어요.',
-  execute: async (
-    _: Client<boolean>,
-    interaction: CommandInteraction<CacheType>,
-  ) => {
+  execute: async (interaction) => {
     try {
       return await interaction.editReply({
         embeds: [

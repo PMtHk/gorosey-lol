@@ -17,7 +17,7 @@ export const register: SlashCommand = {
       type: ApplicationCommandOptionType.String,
     },
   ],
-  execute: async (_, interaction) => {
+  execute: async (interaction) => {
     try {
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')

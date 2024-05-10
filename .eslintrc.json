@@ -21,5 +21,6 @@
   "rules": {
     "prettier/prettier": ["error"],
     "no-param-reassign": ["error", { "props": false }]
-  }
+  },
+  "ignorePatterns": ["jest.config.js", "dist/"]
 }

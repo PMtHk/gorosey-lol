@@ -29,7 +29,7 @@ export const search: SlashCommand = {
       type: ApplicationCommandOptionType.String,
     },
   ],
-  execute: async (_, interaction) => {
+  execute: async (interaction) => {
     let summoner: ISummoner,
       rankStat: IRankStat,
       matchHistories: Array<IMatchHistory>,

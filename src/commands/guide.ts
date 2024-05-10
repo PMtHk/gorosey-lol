@@ -6,7 +6,7 @@ import { SlashCommand } from '../types/SlashCommand'
 export const guide: SlashCommand = {
   name: '도움말',
   description: '고로시롤의 모든 명령어를 확인할 수 있어요.',
-  execute: async (_, interaction) => {
+  execute: async (interaction) => {
     try {
       const commandMessages = commands.map((command, idx) => {
         return `${idx + 1}. \`/${command.name}\` : ${command.description} \n`
