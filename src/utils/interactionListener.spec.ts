@@ -1,19 +1,9 @@
-import { CommandInteraction, Interaction } from 'discord.js'
+import { Interaction } from 'discord.js'
 import slashCommandHandler from './interactionListener'
+import { getCommandInteractionMock } from '../mocks/Interaction.mock'
 
 describe('interactionLister', () => {
-  // interaction.client.ws.ping
-  const interaction = {
-    isCommand: jest.fn(),
-    commandName: '',
-    deferReply: jest.fn(),
-    editReply: jest.fn(),
-    client: {
-      ws: {
-        ping: 100,
-      },
-    },
-  } as unknown as CommandInteraction
+  const interaction = getCommandInteractionMock()
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -29,6 +19,17 @@ describe('interactionLister', () => {
 
     // Assert
     expect(interaction.deferReply).toHaveBeenCalled()
+  })
+
+  it('should return if it is not a command', async () => {
+    // Arrange
+    interaction.isCommand = jest.fn().mockReturnValue(false)
+
+    // Act
+    await slashCommandHandler(interaction as Interaction)
+
+    // Assert
+    expect(interaction.deferReply).not.toHaveBeenCalled()
   })
 
   it("non-existing commands shouldn't be handled", async () => {

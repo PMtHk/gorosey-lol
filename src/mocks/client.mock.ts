@@ -1,13 +1,12 @@
 import { Client, TextChannel } from 'discord.js'
 
-export function getTextChannelMock() {
-  return {
+export const getTextChannelMock = () =>
+  ({
     send: jest.fn(),
-  } as unknown as TextChannel
-}
+  }) as unknown as TextChannel
 
-export function getClientMock() {
-  return {
+export const getClientMock = () =>
+  ({
     application: {
       commands: {
         create: jest.fn(),
@@ -18,5 +17,4 @@ export function getClientMock() {
         get: jest.fn().mockReturnValue(getTextChannelMock()),
       },
     },
-  } as unknown as Client<true>
-}
+  }) as unknown as Client<true>
