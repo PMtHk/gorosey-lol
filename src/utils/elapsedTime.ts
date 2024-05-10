@@ -14,5 +14,8 @@ export const elapsedTime = (date: number): string => {
   const days = hours / 24
   if (days < 7) return `${Math.floor(days)}일 전`
 
+  const weeks = days / 7
+  if (weeks < 4) return `${Math.floor(weeks)}주 전`
+
   return `${start.toLocaleDateString('ko-KR')}`
 }

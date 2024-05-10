@@ -1,1 +1,1 @@
-export const PATCH_VERSION = '14.8.1'
+export const PATCH_VERSION: string = '14.8.1'

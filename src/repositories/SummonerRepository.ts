@@ -1,4 +1,4 @@
-import DBError from '../errors/DBError'
+import { DatabaseError } from '../errors/DatabaseError'
 import Summoner, { ISummoner } from '../models/summoner.model'
 import { dbConnect } from '../mongoose'
 
@@ -32,8 +32,9 @@ class SummonerRepository {
       })
       return createdSummoner
     } catch (error) {
-      console.log(error)
-      throw new DBError('새로운 소환사 생성 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'SummonerRepository.create() error: ' + error.message,
+      )
     }
   }
 
@@ -44,7 +45,9 @@ class SummonerRepository {
       const summoner = await Summoner.findById(riotPuuid).lean()
       return summoner
     } catch (error) {
-      throw new DBError('소환사 조회 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'SummonerRepository.read() error: ' + error.message,
+      )
     }
   }
 
@@ -80,7 +83,9 @@ class SummonerRepository {
       )
       return updatedSummoner
     } catch (error) {
-      throw new DBError('소환사 갱신 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'SummonerRepository.update() error: ' + error.message,
+      )
     }
   }
 
@@ -90,7 +95,9 @@ class SummonerRepository {
 
       await Summoner.findByIdAndDelete(riotPuuid)
     } catch (error) {
-      throw new DBError('소환사 삭제 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'SummonerRepository.delete() error: ' + error.message,
+      )
     }
   }
 }

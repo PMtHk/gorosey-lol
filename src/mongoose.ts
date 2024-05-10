@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import DBError from './errors/DBError'
+import { DatabaseError } from './errors/DatabaseError'
 import * as dotenv from 'dotenv'
 
 dotenv.config()
@@ -25,7 +25,9 @@ export const dbConnect = async () => {
 
     isConnected = true
   } catch (error) {
-    throw new DBError('dbConnect error')
+    throw new DatabaseError(
+      'Cannot connect to remote database. : ' + error.message,
+    )
   }
 }
 
@@ -37,6 +39,6 @@ export const dbDisconnect = async () => {
 
     isConnected = false
   } catch (error) {
-    throw new DBError('dbDisconnect error')
+    throw new DatabaseError('cannot disconnect to remote database. : ' + error)
   }
 }

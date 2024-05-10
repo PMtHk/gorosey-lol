@@ -23,8 +23,7 @@ class BasicSummonerView implements SummonerView {
           ? flexTier
           : 'UNRANKED'
 
-    const color = tierInfos.find((info) => info.id === tier)
-      ?.color as ColorResolvable
+    const color = tierInfos[tier].color as ColorResolvable
 
     return new EmbedBuilder()
       .setColor(color)
@@ -64,7 +63,7 @@ class BasicSummonerView implements SummonerView {
     const { tier, rank, leaguePoints, wins, losses } = rankStat
 
     return tier && tier !== 'UNRANKED'
-      ? `\`${tierInfos.find((elem) => elem.id === tier).name} ${rank}\` - ${leaguePoints}LP\n${wins}승 ${losses}패 (${Math.round(
+      ? `\`${tierInfos[tier].name} ${rank}\` - ${leaguePoints}LP\n${wins}승 ${losses}패 (${Math.round(
           (wins / (wins + losses)) * 100,
         )}%)`
       : '정보 없음'

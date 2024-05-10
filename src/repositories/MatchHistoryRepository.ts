@@ -1,4 +1,4 @@
-import DBError from '../errors/DBError'
+import { DatabaseError } from '../errors/DatabaseError'
 import MatchHistory, { IMatchHistory } from '../models/matchHistory.model'
 import { dbConnect } from '../mongoose'
 
@@ -24,7 +24,9 @@ class MatchHistoryRepository {
 
       return createdMatchHistory
     } catch (error) {
-      throw new DBError('매치 히스토리 생성 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'MatchHistoryRepository.create() error: ' + error.message,
+      )
     }
   }
 
@@ -42,7 +44,9 @@ class MatchHistoryRepository {
 
       return matchHistories
     } catch (error) {
-      throw new DBError('매치 히스토리 조회 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'MatchHistoryRepository.read() error: ' + error.message,
+      )
     }
   }
 
@@ -60,7 +64,9 @@ class MatchHistoryRepository {
 
       return matchHistory
     } catch (error) {
-      throw new DBError('매치 히스토리 조회 중 오류가 발생했습니다.')
+      throw new DatabaseError(
+        'MatchHistoryRepository.readOne() error: ' + error.message,
+      )
     }
   }
 }

@@ -1,4 +1,4 @@
-export const champions = {
+export const champions: Record<string, string> = {
   Aatrox: '아트록스',
   Ahri: '아리',
   Akali: '아칼리',
