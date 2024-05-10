@@ -36,7 +36,7 @@ class MatchHistoryRepository {
 
       const matchHistories = await MatchHistory.find({
         riotPuuid,
-        gameEndTimestamp: { $gte: Date.now() - 1000 * 60 * 60 * 24 * 3 },
+        gameEndTimestamp: { $gte: Date.now() - 1000 * 60 * 60 * 24 * 1 },
       })
         .limit(15)
         .sort({ gameEndTimestamp: -1 })
