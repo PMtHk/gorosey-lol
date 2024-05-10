@@ -4,9 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig-build.json",
     "dev": "node --env-file=.env --watch -r ts-node/register src/server.ts",
-    "test": "jest",
+    "test": "jest --setupFiles dotenv/config",
     "format": "prettier --write . --ignore-path .gitignore",
     "lint": "eslint src/**/*.ts"
   },
