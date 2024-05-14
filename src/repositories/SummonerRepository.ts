@@ -90,16 +90,4 @@ export default class SummonerRepository {
       )
     }
   }
-
-  public async delete(riotPuuid: string): Promise<void> {
-    try {
-      await dbConnect()
-
-      await Summoner.findByIdAndDelete(riotPuuid)
-    } catch (error) {
-      throw new DatabaseError(
-        'SummonerRepository.delete() error: ' + error.message,
-      )
-    }
-  }
 }

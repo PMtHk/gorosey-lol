@@ -104,18 +104,4 @@ export default class RankStatRepository {
       )
     }
   }
-
-  public async delete(summonerId: string): Promise<void> {
-    try {
-      await dbConnect()
-
-      const deletedRankStat = await RankStat.findByIdAndDelete(summonerId)
-
-      return deletedRankStat
-    } catch (error) {
-      throw new DatabaseError(
-        'RankStatRepository.delete() error: ' + error.message,
-      )
-    }
-  }
 }
