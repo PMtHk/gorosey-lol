@@ -1,8 +1,10 @@
+import { Service } from 'typedi'
 import { DatabaseError } from '../errors/DatabaseError'
 import RankStat, { IRankStat } from '../models/rankStat.model'
 import { dbConnect } from '../mongoose'
 
-class RankStatRepository {
+@Service()
+export default class RankStatRepository {
   public async create({
     summonerId,
     RANKED_SOLO_5x5,
@@ -117,7 +119,3 @@ class RankStatRepository {
     }
   }
 }
-
-export const rankStatRepository = new RankStatRepository()
-
-export default RankStatRepository
