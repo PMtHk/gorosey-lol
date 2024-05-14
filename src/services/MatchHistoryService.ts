@@ -90,7 +90,6 @@ export default class MatchHistoryService {
     championName: string
     deaths: number
     gameEndTimestamp: number
-    gameType: string
     kills: number
     position: Lane
     totalMinionsKilled: number
@@ -98,7 +97,7 @@ export default class MatchHistoryService {
     win: boolean
   } {
     const {
-      info: { participants, gameEndTimestamp, gameType },
+      info: { participants, gameEndTimestamp },
       metadata: { matchId },
     } = matchDto
 
@@ -127,7 +126,6 @@ export default class MatchHistoryService {
       championName,
       deaths,
       gameEndTimestamp,
-      gameType,
       kills,
       position,
       totalMinionsKilled,

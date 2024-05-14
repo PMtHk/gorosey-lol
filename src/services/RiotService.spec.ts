@@ -1,10 +1,12 @@
-import { riotService } from './RiotService'
+import RiotService from './RiotService'
 import { riotInstance } from '../utils/riotInstance'
 import { SummonerNotFoundError } from '../errors/NotFoundError'
 import { BadRequestError } from '../errors/BadReqeustError'
 import { LeagueEntryDto } from '../types/riot.dtos'
 
 describe('RiotService', () => {
+  const riotService = new RiotService()
+
   afterEach(() => {
     expect(riotInstance.asia.get).toHaveBeenCalled()
   })

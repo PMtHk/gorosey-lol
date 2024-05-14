@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig-build.json",
     "dev": "node --env-file=.env --watch -r ts-node/register src/server.ts",
-    "test": "jest --setupFiles dotenv/config",
+    "test": "jest",
     "format": "prettier --write . --ignore-path .gitignore",
     "lint": "eslint src/**/*.ts"
   },
