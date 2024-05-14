@@ -1,8 +1,10 @@
+import { Service } from 'typedi'
 import { DatabaseError } from '../errors/DatabaseError'
 import Summoner, { ISummoner } from '../models/summoner.model'
 import { dbConnect } from '../mongoose'
 
-class SummonerRepository {
+@Service()
+export default class SummonerRepository {
   public async create({
     riotPuuid,
     gameName,
@@ -101,7 +103,3 @@ class SummonerRepository {
     }
   }
 }
-
-export const summonerRepository = new SummonerRepository()
-
-export default SummonerRepository

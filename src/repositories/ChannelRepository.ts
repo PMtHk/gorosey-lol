@@ -1,8 +1,10 @@
+import { Service } from 'typedi'
 import { DatabaseError } from '../errors/DatabaseError'
 import Channel, { IChannel } from '../models/channel.model'
 import { dbConnect } from '../mongoose'
 
-class ChannelRepository {
+@Service()
+export default class ChannelRepository {
   public async create(guildId: string, channelId: string): Promise<IChannel> {
     try {
       await dbConnect()
@@ -89,7 +91,3 @@ class ChannelRepository {
     }
   }
 }
-
-export const channelRepository = new ChannelRepository()
-
-export default ChannelRepository

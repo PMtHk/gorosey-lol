@@ -1,8 +1,10 @@
+import { Service } from 'typedi'
 import { DatabaseError } from '../errors/DatabaseError'
 import MatchHistory, { IMatchHistory } from '../models/matchHistory.model'
 import { dbConnect } from '../mongoose'
 
-class MatchHistoryRepository {
+@Service()
+export default class MatchHistoryRepository {
   public async create(matchHistory: {
     riotPuuid: string
     matchId: string
@@ -70,7 +72,3 @@ class MatchHistoryRepository {
     }
   }
 }
-
-export const matchHistoryRepository = new MatchHistoryRepository()
-
-export default MatchHistoryRepository

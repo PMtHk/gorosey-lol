@@ -1,18 +1,22 @@
+import { Service } from 'typedi'
 import { IRankStat } from '../models/rankStat.model'
-import { dbConnect } from '../mongoose'
-import { rankStatRepository } from '../repositories/RankStatRepository'
-import { riotService } from './RiotService'
+import RankStatRepository from '../repositories/RankStatRepository'
+import RiotService from './RiotService'
 
-class RankStatService {
+@Service()
+export default class RankStatService {
+  constructor(
+    private rankStatRepository: RankStatRepository,
+    private riotService: RiotService,
+  ) {}
+
   public async read(summonerId: string): Promise<IRankStat> {
-    await dbConnect()
-
-    const rankStat = await rankStatRepository.read(summonerId)
+    const rankStat = await this.rankStatRepository.read(summonerId)
 
     if (!rankStat) {
       const { solos, flexes } = await this.getRecentRankStat(summonerId)
 
-      const createdRankStat = await rankStatRepository.create({
+      const createdRankStat = await this.rankStatRepository.create({
         summonerId: summonerId,
         RANKED_SOLO_5x5: solos
           ? {
@@ -45,7 +49,7 @@ class RankStatService {
   public async refresh(summonerId: string): Promise<IRankStat> {
     const { solos, flexes } = await this.getRecentRankStat(summonerId)
 
-    const updatedRankStat = await rankStatRepository.update(summonerId, {
+    const updatedRankStat = await this.rankStatRepository.update(summonerId, {
       RANKED_SOLO_5x5: solos
         ? {
             leagueId: solos.leagueId,
@@ -72,7 +76,7 @@ class RankStatService {
   }
 
   private async getRecentRankStat(summonerId: string) {
-    const leagueEntryInfo = await riotService.fetchLeagueEntry(summonerId)
+    const leagueEntryInfo = await this.riotService.fetchLeagueEntry(summonerId)
 
     const solos = leagueEntryInfo.find(
       (entry) => entry.queueType === 'RANKED_SOLO_5x5',
@@ -85,7 +89,3 @@ class RankStatService {
     return { solos, flexes }
   }
 }
-
-export const rankStatService = new RankStatService()
-
-export default RankStatService

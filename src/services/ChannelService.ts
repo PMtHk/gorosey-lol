@@ -1,10 +1,14 @@
+import { Service } from 'typedi'
 import { BadRequestError } from '../errors/BadReqeustError'
 import { IChannel } from '../models/channel.model'
-import { channelRepository } from '../repositories/ChannelRepository'
+import ChannelRepository from '../repositories/ChannelRepository'
 
-class ChannelService {
+@Service()
+export default class ChannelService {
+  constructor(private channelRepository: ChannelRepository) {}
+
   public async getWatchList(guildId: string): Promise<Array<string>> {
-    const channel: IChannel = await channelRepository.read(guildId)
+    const channel: IChannel = await this.channelRepository.read(guildId)
 
     if (!channel) {
       return []
@@ -18,14 +22,15 @@ class ChannelService {
     textChannelId: string,
     riotPuuidToAdd: string,
   ): Promise<Array<string>> {
-    const channel: IChannel = await channelRepository.read(guildId)
+    const channel: IChannel = await this.channelRepository.read(guildId)
 
     if (!channel) {
-      await channelRepository.create(guildId, textChannelId)
+      await this.channelRepository.create(guildId, textChannelId)
 
-      const updatedChannel: IChannel = await channelRepository.update(guildId, [
-        riotPuuidToAdd,
-      ])
+      const updatedChannel: IChannel = await this.channelRepository.update(
+        guildId,
+        [riotPuuidToAdd],
+      )
 
       return updatedChannel.watchList
     }
@@ -43,7 +48,10 @@ class ChannelService {
       )
 
     const newWatchList = [...channel.watchList, riotPuuidToAdd]
-    const updatedChannel = await channelRepository.update(guildId, newWatchList)
+    const updatedChannel = await this.channelRepository.update(
+      guildId,
+      newWatchList,
+    )
 
     return updatedChannel.watchList
   }
@@ -52,7 +60,7 @@ class ChannelService {
     guildId: string,
     riotPuuidToRemove: string,
   ): Promise<Array<string>> {
-    const channel: IChannel = await channelRepository.read(guildId)
+    const channel: IChannel = await this.channelRepository.read(guildId)
 
     if (!channel || channel.watchList.length === 0)
       throw new BadRequestError(
@@ -69,7 +77,7 @@ class ChannelService {
     const newWatchList = channel.watchList.filter(
       (watchedPuuid) => watchedPuuid !== riotPuuidToRemove,
     )
-    const updatedChannel: IChannel = await channelRepository.update(
+    const updatedChannel: IChannel = await this.channelRepository.update(
       guildId,
       newWatchList,
     )
@@ -78,12 +86,8 @@ class ChannelService {
   }
 
   public async getAllChannels(): Promise<Array<IChannel>> {
-    const channels = await channelRepository.findAll()
+    const channels = await this.channelRepository.findAll()
 
     return channels
   }
 }
-
-export const channelService = new ChannelService()
-
-export default ChannelService
