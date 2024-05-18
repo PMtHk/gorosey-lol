@@ -76,4 +76,18 @@ export default class ChannelRepository {
       )
     }
   }
+
+  public async delete(guildId: string): Promise<IChannel> {
+    try {
+      await dbConnect()
+
+      const deletedChannel = await Channel.findByIdAndDelete(guildId)
+
+      return deletedChannel
+    } catch (error) {
+      throw new DatabaseError(
+        'ChannelRepository.delete() error: ' + error.message,
+      )
+    }
+  }
 }
