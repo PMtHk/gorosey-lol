@@ -1,15 +1,27 @@
 import { createMockedRiotService } from '../mocks/RiotService.mock'
 import { createMockedSummonerRepository } from '../mocks/SummonerRepository.mock'
+import SummonerRepository from '../repositories/SummonerRepository'
+import RiotService from './RiotService'
 import SummonerService from './SummonerService'
 
 describe('SummonerService', () => {
-  const MockedSummonerRepository = createMockedSummonerRepository()
-  const MockedRiotService = createMockedRiotService()
+  let MockedSummonerRepository: SummonerRepository
+  let MockedRiotService: RiotService
+  let summonerService: SummonerService
 
-  const summonerService = new SummonerService(
-    MockedSummonerRepository,
-    MockedRiotService,
-  )
+  beforeEach(() => {
+    MockedSummonerRepository = createMockedSummonerRepository()
+    MockedRiotService = createMockedRiotService()
+
+    summonerService = new SummonerService(
+      MockedSummonerRepository,
+      MockedRiotService,
+    )
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   describe('read', () => {
     it('existing summoner', async () => {

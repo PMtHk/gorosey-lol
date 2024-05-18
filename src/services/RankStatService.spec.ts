@@ -1,15 +1,27 @@
 import { createMockedRankStatRepository } from '../mocks/RankStatRepository.mock'
 import { createMockedRiotService } from '../mocks/RiotService.mock'
+import RankStatRepository from '../repositories/RankStatRepository'
 import RankStatService from './RankStatService'
+import RiotService from './RiotService'
 
 describe('RankStatService', () => {
-  const MockedRankStatRepository = createMockedRankStatRepository()
-  const MockedRiotService = createMockedRiotService()
+  let MockedRankStatRepository: RankStatRepository
+  let MockedRiotService: RiotService
+  let rankStatService: RankStatService
 
-  const rankStatService = new RankStatService(
-    MockedRankStatRepository,
-    MockedRiotService,
-  )
+  beforeEach(() => {
+    MockedRankStatRepository = createMockedRankStatRepository()
+    MockedRiotService = createMockedRiotService()
+
+    rankStatService = new RankStatService(
+      MockedRankStatRepository,
+      MockedRiotService,
+    )
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   describe('read', () => {
     it('existing rankStat', async () => {

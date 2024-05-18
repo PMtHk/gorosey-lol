@@ -1,15 +1,26 @@
 import { createMockedMatchHistoryRepository } from '../mocks/MatchHistoryRepository.mock'
 import { createMockedRiotService } from '../mocks/RiotService.mock'
+import MatchHistoryRepository from '../repositories/MatchHistoryRepository'
 import MatchHistoryService from './MatchHistoryService'
 
 describe('MatchHistoryService', () => {
-  const MockedMatchHistoryRepository = createMockedMatchHistoryRepository()
-  const MockedRiotService = createMockedRiotService()
+  let MockedMatchHistoryRepository: MatchHistoryRepository
+  let MockedRiotService: ReturnType<typeof createMockedRiotService>
+  let matchHistoryService: MatchHistoryService
 
-  const matchHistoryService = new MatchHistoryService(
-    MockedMatchHistoryRepository,
-    MockedRiotService,
-  )
+  beforeEach(() => {
+    MockedMatchHistoryRepository = createMockedMatchHistoryRepository()
+    MockedRiotService = createMockedRiotService()
+
+    matchHistoryService = new MatchHistoryService(
+      MockedMatchHistoryRepository,
+      MockedRiotService,
+    )
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   describe('read', () => {
     it('default', async () => {

@@ -1,13 +1,18 @@
 import { BadRequestError } from '../errors/BadReqeustError'
 import { createMockedChannelRepository } from '../mocks/ChannelRepsitory.mock'
+import ChannelRepository from '../repositories/ChannelRepository'
 import ChannelService from './ChannelService'
 
-let MockedChannelRepository = createMockedChannelRepository()
-let channelService = new ChannelService(MockedChannelRepository)
+let MockedChannelRepository: ChannelRepository
+let channelService: ChannelService
 
-afterEach(() => {
+beforeEach(() => {
   MockedChannelRepository = createMockedChannelRepository()
   channelService = new ChannelService(MockedChannelRepository)
+})
+
+afterEach(() => {
+  jest.clearAllMocks()
 })
 
 describe('ChannelService', () => {

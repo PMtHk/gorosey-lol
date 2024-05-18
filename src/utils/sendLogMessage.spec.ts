@@ -3,7 +3,15 @@ import { sendLogMessage } from './sendLogMessage'
 import { getClientMock } from '../mocks/client.mock'
 
 describe('sendLogMessage', () => {
-  const client = getClientMock()
+  let client: ReturnType<typeof getClientMock>
+
+  beforeEach(() => {
+    client = getClientMock()
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
 
   it('should be sent with message', () => {
     // Arrange
@@ -11,6 +19,8 @@ describe('sendLogMessage', () => {
       | string
       | MessagePayload
       | MessageCreateOptions
+
+    // Act
     const alertChannel = client.channels.cache.get('123') as TextChannel
     sendLogMessage(client, message)
 
