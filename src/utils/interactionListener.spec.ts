@@ -1,46 +1,50 @@
-import { Interaction } from 'discord.js'
+import { CommandInteraction, Interaction } from 'discord.js'
 import slashCommandHandler from './interactionListener'
 import { getCommandInteractionMock } from '../mocks/Interaction.mock'
 
 describe('interactionLister', () => {
-  const interaction = getCommandInteractionMock()
+  let interactionMock: CommandInteraction
 
   beforeEach(() => {
+    interactionMock = getCommandInteractionMock()
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
-  it('existing commands should be handled properly', async () => {
+  it('should not proceed if command is not a command', async () => {
     // Arrange
-    interaction.isCommand = jest.fn().mockReturnValue(true)
-    interaction.commandName = '핑'
+    interactionMock.isCommand = jest.fn().mockReturnValue(false)
 
     // Act
-    await slashCommandHandler(interaction as Interaction)
+    await slashCommandHandler(interactionMock as Interaction)
 
     // Assert
-    expect(interaction.deferReply).toHaveBeenCalled()
+    expect(interactionMock.deferReply).not.toHaveBeenCalled()
   })
 
-  it('should return if it is not a command', async () => {
+  it('should not procceed if command is not found', async () => {
     // Arrange
-    interaction.isCommand = jest.fn().mockReturnValue(false)
+    interactionMock.isCommand = jest.fn().mockReturnValue(true)
+    interactionMock.commandName = 'non-existing command'
 
     // Act
-    await slashCommandHandler(interaction as Interaction)
+    await slashCommandHandler(interactionMock as Interaction)
 
     // Assert
-    expect(interaction.deferReply).not.toHaveBeenCalled()
+    expect(interactionMock.deferReply).not.toHaveBeenCalled()
   })
 
-  it("non-existing commands shouldn't be handled", async () => {
-    // Arrage
-    interaction.isCommand = jest.fn().mockReturnValue(true)
-    interaction.commandName = 'non-existing command'
+  it('should proceed if command is found', async () => {
+    // Arrange
+    interactionMock.isCommand = jest.fn().mockReturnValue(true)
+    interactionMock.commandName = '핑'
 
     // Act
-    await slashCommandHandler(interaction as Interaction)
+    await slashCommandHandler(interactionMock as Interaction)
 
     // Assert
-    expect(interaction.deferReply).not.toHaveBeenCalled()
+    expect(interactionMock.deferReply).toHaveBeenCalled()
   })
 })
