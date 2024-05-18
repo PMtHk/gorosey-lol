@@ -24,8 +24,11 @@ describe('MatchHistoryService', () => {
 
   describe('read', () => {
     it('default', async () => {
+      // Arrange
+      // Act
       const result = await matchHistoryService.read('test_riot_puuid')
 
+      // Assert
       expect(result).toHaveLength(2)
       expect(result[0]).toHaveProperty('_id', 'test_match_id')
       expect(result[1]).toHaveProperty('_id', 'test_match_id2')
@@ -34,10 +37,13 @@ describe('MatchHistoryService', () => {
 
   describe('refresh', () => {
     it('default', async () => {
+      // Arrange
       MockedMatchHistoryRepository.readOne = jest.fn().mockResolvedValue(null)
 
+      // Act
       await matchHistoryService.refresh('test_riot_puuid')
 
+      // Assert
       expect(MockedMatchHistoryRepository.create).toHaveBeenCalledTimes(2)
     })
   })

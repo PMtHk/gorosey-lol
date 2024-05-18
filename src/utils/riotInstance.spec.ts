@@ -29,7 +29,6 @@ describe('createRiotInstance', () => {
         'X-Riot-Token': RIOT_API_KEY,
       },
     })
-
     expect(asia).toEqual(axios.create())
     expect(kr).toEqual(axios.create())
   })

@@ -18,6 +18,11 @@ describe.each([
   [Date.now() - 1000 * 60 * 60 * 24 * 7 * 3, '3주 전'],
 ])('elapsedTime', (time, expected) => {
   it(`returns ${expected} when time is ${time}`, () => {
-    expect(elapsedTime(time)).toBe(expected)
+    // Arrange
+    // Act
+    const result = elapsedTime(time)
+
+    // Assert
+    expect(result).toBe(expected)
   })
 })
