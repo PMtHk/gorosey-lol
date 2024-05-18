@@ -5,21 +5,37 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from 'discord.js'
-import { ISummoner } from '../models/summoner.model'
-import { channelService } from '../services/ChannelService'
-import { summonerService } from '../services/SummonerService'
-import { SlashCommand } from '../types/SlashCommand'
+import Container from 'typedi'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
+import { ISummoner } from '../models/summoner.model'
+import ChannelService from '../services/ChannelService'
+import SummonerService from '../services/SummonerService'
+import { SlashCommand } from '../types/SlashCommand'
 
 export const deregister: SlashCommand = {
   name: '해제',
   description: '특정 소환사를 워치리스트에서 제거할 수 있어요.',
   execute: async (interaction) => {
     try {
+      // define services
+      const summonerService = Container.get(SummonerService)
+      const channelService = Container.get(ChannelService)
+
       const guildId = interaction.guildId
       const watchList = await channelService.getWatchList(guildId)
+
+      // check if watchlist is empty
+      if (watchList.length === 0) {
+        return await interaction.editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor(COLORS.embedColor.warning)
+              .setDescription('워치리스트가 비어있어요.'),
+          ],
+        })
+      }
 
       // create view
       const descriptionEmbed = new EmbedBuilder()

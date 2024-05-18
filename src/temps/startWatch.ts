@@ -1,10 +1,11 @@
-import cron from 'node-cron'
 import { Client, TextChannel } from 'discord.js'
+import cron from 'node-cron'
+import Container from 'typedi'
 import { IChannel } from '../models/channel.model'
-import { channelService } from '../services/ChannelService'
-import { matchHistoryService } from '../services/MatchHistoryService'
-import { rankStatService } from '../services/RankStatService'
-import { summonerService } from '../services/SummonerService'
+import ChannelService from '../services/ChannelService'
+import MatchHistoryService from '../services/MatchHistoryService'
+import RankStatService from '../services/RankStatService'
+import SummonerService from '../services/SummonerService'
 import { detailedSummonerView } from '../views/DetailedSummonerView'
 
 export const startWatch = (client: Client<boolean>) => {
@@ -12,6 +13,12 @@ export const startWatch = (client: Client<boolean>) => {
     '55 12,23 * * *',
     async () => {
       try {
+        // define services
+        const channelService = Container.get(ChannelService)
+        const summonerService = Container.get(SummonerService)
+        const rankStatService = Container.get(RankStatService)
+        const matchHistoryService = Container.get(MatchHistoryService)
+
         const channels: Array<IChannel> = await channelService.getAllChannels()
 
         for await (const channel of channels) {

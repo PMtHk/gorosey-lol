@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
 import slashCommandHandler from './utils/interactionListener'
 import clientReadyListener from './utils/clilentReadyListener'
+import guildDeleteListener from './utils/guildDeleteListener'
 
 dotenv.config()
 
@@ -23,6 +24,8 @@ const client = new Client({
 client.once(Events.ClientReady, clientReadyListener)
 
 client.on(Events.InteractionCreate, slashCommandHandler)
+
+client.on(Events.GuildDelete, guildDeleteListener)
 
 export const initBot = () => {
   client.login(DISCORD_TOKEN)

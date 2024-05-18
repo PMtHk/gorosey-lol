@@ -1,10 +1,11 @@
 import { EmbedBuilder } from 'discord.js'
+import Container from 'typedi'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { channelService } from '../services/ChannelService'
-import { rankStatService } from '../services/RankStatService'
-import { summonerService } from '../services/SummonerService'
+import ChannelService from '../services/ChannelService'
+import RankStatService from '../services/RankStatService'
+import SummonerService from '../services/SummonerService'
 import { SlashCommand } from '../types/SlashCommand'
 import { basicSummonerView } from '../views/BasicSummonerView'
 
@@ -13,6 +14,11 @@ export const watchList: SlashCommand = {
   description: '이 채널의 워치리스트를 조회해요.',
   execute: async (interaction) => {
     try {
+      // define services
+      const channelService = Container.get(ChannelService)
+      const summonerService = Container.get(SummonerService)
+      const rankStatService = Container.get(RankStatService)
+
       const guildId = interaction.guildId
       const guildName = interaction.guild?.name
 

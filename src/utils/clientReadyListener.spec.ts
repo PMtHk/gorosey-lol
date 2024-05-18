@@ -1,33 +1,59 @@
 import clientReadyListener from './clilentReadyListener'
 import commands from '../commands'
-import { getClientMock, getTextChannelMock } from '../mocks/client.mock'
+import { getClientMock } from '../mocks/client.mock'
+import * as StartWatch from '../temps/startWatch'
+import * as SendLogMessage from './sendLogMessage'
+import { Client } from 'discord.js'
 
 describe('clientReadyListener', () => {
-  const client = getClientMock()
+  let clientMock: Client<true>
 
   beforeEach(() => {
+    clientMock = getClientMock()
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
   it('should create all clashCommands', async () => {
     // Arrange
-    client.channels.cache.get = jest.fn().mockReturnValue(getTextChannelMock())
-
     // Act
-    await clientReadyListener(client)
+    await clientReadyListener(clientMock)
 
-    // Assert
-    expect(client.application.commands.create).toHaveBeenCalledTimes(
+    expect(clientMock.application.commands.create).toHaveBeenCalledTimes(
       commands.length,
     )
   })
 
-  it("end if client.application doesn't exist", async () => {
+  it('should call startWatch', async () => {
     // Arrange
-    client.application = null
+    const startWatchSpy = jest.spyOn(StartWatch, 'startWatch')
 
     // Act
-    const result = await clientReadyListener(client)
+    await clientReadyListener(clientMock)
+
+    // Assert
+    expect(startWatchSpy).toHaveBeenCalled()
+  })
+
+  it('should send a log message', async () => {
+    // Arrange
+    const sendLogMessageSpy = jest.spyOn(SendLogMessage, 'sendLogMessage')
+
+    // Act
+    await clientReadyListener(clientMock)
+
+    // Assert
+    expect(sendLogMessageSpy).toHaveBeenCalled()
+  })
+
+  it('should not proceed without client.application', async () => {
+    // Arrange
+    clientMock.application = null
+
+    // Act
+    const result = await clientReadyListener(clientMock)
 
     // Assert
     expect(result).toBeUndefined()

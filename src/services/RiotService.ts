@@ -1,17 +1,19 @@
-import { riotInstance } from '../utils/riotInstance'
+import { Service } from 'typedi'
+import { BadRequestError } from '../errors/BadReqeustError'
+import { SummonerNotFoundError } from '../errors/NotFoundError'
+import { RiotAPIError } from '../errors/RiotAPIError'
+import { UnexpectedError } from '../errors/UnexpectedError'
 import {
   AccountDto,
-  LeagueEntryDto,
-  MatchDto,
-  MatchesDto,
   SummonerDto,
+  LeagueEntryDto,
+  MatchesDto,
+  MatchDto,
 } from '../types/riot.dtos'
-import { RiotAPIError } from '../errors/RiotAPIError'
-import { SummonerNotFoundError } from '../errors/NotFoundError'
-import { BadRequestError } from '../errors/BadReqeustError'
-import { UnexpectedError } from '../errors/UnexpectedError'
+import { riotInstance } from '../utils/riotInstance'
 
-class RiotService {
+@Service()
+export default class RiotService {
   public async fetchAccount(
     gameName: string,
     tagLine: string = 'KR1',
@@ -124,7 +126,3 @@ class RiotService {
     throw new UnexpectedError(error.message)
   }
 }
-
-export const riotService = new RiotService()
-
-export default RiotService

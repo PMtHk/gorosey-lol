@@ -1,8 +1,10 @@
+import { Service } from 'typedi'
 import { DatabaseError } from '../errors/DatabaseError'
 import Channel, { IChannel } from '../models/channel.model'
 import { dbConnect } from '../mongoose'
 
-class ChannelRepository {
+@Service()
+export default class ChannelRepository {
   public async create(guildId: string, channelId: string): Promise<IChannel> {
     try {
       await dbConnect()
@@ -61,20 +63,6 @@ class ChannelRepository {
     }
   }
 
-  public async delete(guildId: string): Promise<void> {
-    try {
-      await dbConnect()
-
-      const deletedCahnnel = await Channel.findByIdAndDelete(guildId)
-
-      return deletedCahnnel
-    } catch (error) {
-      throw new DatabaseError(
-        'ChannelRepository.delete() error: ' + error.message,
-      )
-    }
-  }
-
   public async findAll(): Promise<IChannel[]> {
     try {
       await dbConnect()
@@ -88,8 +76,18 @@ class ChannelRepository {
       )
     }
   }
+
+  public async delete(guildId: string): Promise<IChannel> {
+    try {
+      await dbConnect()
+
+      const deletedChannel = await Channel.findByIdAndDelete(guildId)
+
+      return deletedChannel
+    } catch (error) {
+      throw new DatabaseError(
+        'ChannelRepository.delete() error: ' + error.message,
+      )
+    }
+  }
 }
-
-export const channelRepository = new ChannelRepository()
-
-export default ChannelRepository

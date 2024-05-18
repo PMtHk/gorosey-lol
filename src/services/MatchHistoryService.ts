@@ -1,12 +1,19 @@
+import { Service } from 'typedi'
 import { IMatchHistory } from '../models/matchHistory.model'
-import { matchHistoryRepository } from '../repositories/MatchHistoryRepository'
+import MatchHistoryRepository from '../repositories/MatchHistoryRepository'
 import { Lane } from '../types/lol.types'
 import { MatchDto } from '../types/riot.dtos'
-import { riotService } from './RiotService'
+import RiotService from './RiotService'
 
-class MatchHistoryService {
+@Service()
+export default class MatchHistoryService {
+  constructor(
+    private matchHistoryRepository: MatchHistoryRepository,
+    private riotService: RiotService,
+  ) {}
+
   public async read(riotPuuid: string): Promise<Array<IMatchHistory>> {
-    const matchHistories = await matchHistoryRepository.read(riotPuuid)
+    const matchHistories = await this.matchHistoryRepository.read(riotPuuid)
 
     return matchHistories
   }
@@ -24,7 +31,7 @@ class MatchHistoryService {
     const matchInfos = soloMatchInfos.concat(flexMatchInfos)
 
     for await (const matchInfo of matchInfos) {
-      await matchHistoryRepository.create({
+      await this.matchHistoryRepository.create({
         ...matchInfo,
       })
     }
@@ -47,21 +54,21 @@ class MatchHistoryService {
 
     const matchInfos = []
 
-    const matchIds = await riotService.fetchMatches(riotPuuid, {
+    const matchIds = await this.riotService.fetchMatches(riotPuuid, {
       startTime: Math.round(startTime / 1000),
       queue: gameType[type],
       count: 100,
     })
 
     for await (const matchId of matchIds) {
-      const alreadyExist = await matchHistoryRepository.readOne(
+      const alreadyExist = await this.matchHistoryRepository.readOne(
         riotPuuid,
         matchId,
       )
 
       if (alreadyExist) continue
 
-      const matchDto = await riotService.fetchMatchData(matchId)
+      const matchDto = await this.riotService.fetchMatchData(matchId)
       const infos = this.extractInfos(riotPuuid, matchDto)
 
       matchInfos.push({
@@ -83,7 +90,6 @@ class MatchHistoryService {
     championName: string
     deaths: number
     gameEndTimestamp: number
-    gameType: string
     kills: number
     position: Lane
     totalMinionsKilled: number
@@ -91,7 +97,7 @@ class MatchHistoryService {
     win: boolean
   } {
     const {
-      info: { participants, gameEndTimestamp, gameType },
+      info: { participants, gameEndTimestamp },
       metadata: { matchId },
     } = matchDto
 
@@ -120,7 +126,6 @@ class MatchHistoryService {
       championName,
       deaths,
       gameEndTimestamp,
-      gameType,
       kills,
       position,
       totalMinionsKilled,
@@ -129,7 +134,3 @@ class MatchHistoryService {
     }
   }
 }
-
-export const matchHistoryService = new MatchHistoryService()
-
-export default MatchHistoryService

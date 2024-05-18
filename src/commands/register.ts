@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js'
+import Container from 'typedi'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { channelService } from '../services/ChannelService'
-import { riotService } from '../services/RiotService'
+import ChannelService from '../services/ChannelService'
+import RiotService from '../services/RiotService'
 import { SlashCommand } from '../types/SlashCommand'
 
 export const register: SlashCommand = {
@@ -19,6 +20,10 @@ export const register: SlashCommand = {
   ],
   execute: async (interaction) => {
     try {
+      // define services
+      const riotService = Container.get(RiotService)
+      const channelService = Container.get(ChannelService)
+
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
 

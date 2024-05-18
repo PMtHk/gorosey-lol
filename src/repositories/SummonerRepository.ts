@@ -1,8 +1,10 @@
+import { Service } from 'typedi'
 import { DatabaseError } from '../errors/DatabaseError'
 import Summoner, { ISummoner } from '../models/summoner.model'
 import { dbConnect } from '../mongoose'
 
-class SummonerRepository {
+@Service()
+export default class SummonerRepository {
   public async create({
     riotPuuid,
     gameName,
@@ -88,20 +90,4 @@ class SummonerRepository {
       )
     }
   }
-
-  public async delete(riotPuuid: string): Promise<void> {
-    try {
-      await dbConnect()
-
-      await Summoner.findByIdAndDelete(riotPuuid)
-    } catch (error) {
-      throw new DatabaseError(
-        'SummonerRepository.delete() error: ' + error.message,
-      )
-    }
-  }
 }
-
-export const summonerRepository = new SummonerRepository()
-
-export default SummonerRepository

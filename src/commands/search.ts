@@ -6,15 +6,16 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from 'discord.js'
+import Container from 'typedi'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
 import { IMatchHistory } from '../models/matchHistory.model'
 import { IRankStat } from '../models/rankStat.model'
 import { ISummoner } from '../models/summoner.model'
-import { matchHistoryService } from '../services/MatchHistoryService'
-import { rankStatService } from '../services/RankStatService'
-import { riotService } from '../services/RiotService'
-import { summonerService } from '../services/SummonerService'
+import MatchHistoryService from '../services/MatchHistoryService'
+import RankStatService from '../services/RankStatService'
+import RiotService from '../services/RiotService'
+import SummonerService from '../services/SummonerService'
 import { SlashCommand } from '../types/SlashCommand'
 import { detailedSummonerView } from '../views/DetailedSummonerView'
 
@@ -36,6 +37,12 @@ export const search: SlashCommand = {
       replyEmbed: EmbedBuilder
 
     try {
+      // define services
+      const riotService = Container.get(RiotService)
+      const summonerService = Container.get(SummonerService)
+      const rankStatService = Container.get(RankStatService)
+      const matchHistoryService = Container.get(MatchHistoryService)
+
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
 
@@ -44,7 +51,6 @@ export const search: SlashCommand = {
         inputTagLine || 'KR1',
       )
 
-      // services
       summoner = await summonerService.read(riotPuuid)
       const summonerId = summoner.summonerId
 

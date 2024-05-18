@@ -1,18 +1,22 @@
-import { dbConnect } from '../mongoose'
-import { summonerRepository } from '../repositories/SummonerRepository'
-import { riotService } from './RiotService'
+import { Service } from 'typedi'
+import SummonerRepository from '../repositories/SummonerRepository'
+import RiotService from './RiotService'
 
-class SummonerService {
+@Service()
+export default class SummonerService {
+  constructor(
+    private summonerRepository: SummonerRepository,
+    private riotService: RiotService,
+  ) {}
+
   public async read(riotPuuid: string) {
-    await dbConnect()
-
-    const summoner = await summonerRepository.read(riotPuuid)
+    const summoner = await this.summonerRepository.read(riotPuuid)
 
     if (!summoner) {
       const fetchedSummonerInfo = await this.getRecentSummoner(riotPuuid)
 
       const createdSummoner =
-        await summonerRepository.create(fetchedSummonerInfo)
+        await this.summonerRepository.create(fetchedSummonerInfo)
 
       return createdSummoner
     }
@@ -22,19 +26,21 @@ class SummonerService {
 
   public async refresh(riotPuuid: string) {
     const fetchedSummonerInfo = await this.getRecentSummoner(riotPuuid)
-    const updatedSummoner = await summonerRepository.update(fetchedSummonerInfo)
+    const updatedSummoner =
+      await this.summonerRepository.update(fetchedSummonerInfo)
 
     return updatedSummoner
   }
 
   private async getRecentSummoner(riotPuuid: string) {
     const { gameName, tagLine } =
-      await riotService.fetchAccountByPuuid(riotPuuid)
+      await this.riotService.fetchAccountByPuuid(riotPuuid)
+
     const {
       id: summonerId,
       summonerLevel,
       profileIconId,
-    } = await riotService.fetchSummoner(riotPuuid)
+    } = await this.riotService.fetchSummoner(riotPuuid)
 
     return {
       riotPuuid,
@@ -46,7 +52,3 @@ class SummonerService {
     }
   }
 }
-
-export const summonerService = new SummonerService()
-
-export default SummonerService
