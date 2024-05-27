@@ -39,7 +39,7 @@ export default class ChannelRepository {
 
   public async update(
     guildId: string,
-    newWatchList: string[],
+    newWatchList?: string[],
     newTextChannel?: string,
   ): Promise<IChannel> {
     try {
@@ -49,7 +49,7 @@ export default class ChannelRepository {
         guildId,
         {
           ...(newTextChannel && { textChannel: newTextChannel }),
-          watchList: newWatchList,
+          ...(newWatchList && { watchList: newWatchList }),
           lastUpdatedAt: Date.now(),
         },
         { new: true },

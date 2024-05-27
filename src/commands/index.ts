@@ -4,7 +4,18 @@ import { ping } from './ping'
 import { register } from './register'
 import { search } from './search'
 import { watchList } from './watchList'
+import { changeChannel } from './changeChannel'
+import { changeTime } from './changeTime'
 
-const commands = [ping, search, register, guide, deregister, watchList]
+const commands = [
+  ping,
+  search,
+  register,
+  guide,
+  deregister,
+  watchList,
+  changeChannel,
+  changeTime,
+]
 
 export default commands

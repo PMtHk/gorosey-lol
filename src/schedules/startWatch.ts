@@ -1,32 +1,44 @@
 import { Client, TextChannel } from 'discord.js'
 import cron from 'node-cron'
 import Container from 'typedi'
-import { IChannel } from '../models/channel.model'
-import ChannelService from '../services/ChannelService'
+
 import MatchHistoryService from '../services/MatchHistoryService'
 import RankStatService from '../services/RankStatService'
 import SummonerService from '../services/SummonerService'
+import ScheduleService from '../services/schedule.service'
+
 import { detailedSummonerView } from '../views/DetailedSummonerView'
+import { dbConnect } from '../mongoose'
 
 export const startWatch = (client: Client<boolean>) => {
   cron.schedule(
-    '55 12,23 * * *',
-    async () => {
+    '0 * * * *', // every hour
+    async (now) => {
       try {
         // define services
-        const channelService = Container.get(ChannelService)
         const summonerService = Container.get(SummonerService)
         const rankStatService = Container.get(RankStatService)
         const matchHistoryService = Container.get(MatchHistoryService)
+        const scheduleService = Container.get(ScheduleService)
 
-        const channels: Array<IChannel> = await channelService.getAllChannels()
+        // db connection (sechdule 서비스 생성 후 제거할 예정)
+        await dbConnect()
 
-        for await (const channel of channels) {
-          const { textChannel, watchList } = channel
+        const hour = new Date(now).getHours()
 
-          if (!watchList || watchList.length === 0) {
-            continue
+        const schedules = await scheduleService.getSchedules(hour.toString())
+
+        const channelInfos = schedules.map((schedule) => {
+          return {
+            textChannel: schedule.guildId.textChannel,
+            watchList: schedule.guildId.watchList,
           }
+        })
+
+        for await (const channelInfo of channelInfos) {
+          const { textChannel, watchList } = channelInfo
+
+          if (!watchList || watchList.length === 0) continue
 
           const targetTextChannel = (await client.channels.fetch(
             textChannel,

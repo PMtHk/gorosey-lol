@@ -10,6 +10,8 @@ export default async function guildDeleteListener(guild: Guild) {
     const channelService = new ChannelService(channelRepository)
 
     await channelService.deleteChannel(guildId)
+
+    // TODO: delete all schedules related to the guild
   } catch (error) {
     console.log('guildDeleteListener error: ', error)
   }
