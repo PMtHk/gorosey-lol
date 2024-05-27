@@ -5,6 +5,7 @@ import { register } from './register'
 import { search } from './search'
 import { watchList } from './watchList'
 import { changeChannel } from './changeChannel'
+import { changeTime } from './changeTime'
 
 const commands = [
   ping,
@@ -14,6 +15,7 @@ const commands = [
   deregister,
   watchList,
   changeChannel,
+  changeTime,
 ]
 
 export default commands

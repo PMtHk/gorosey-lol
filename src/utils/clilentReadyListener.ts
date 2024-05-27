@@ -1,6 +1,6 @@
 import { Client } from 'discord.js'
 import commands from '../commands'
-import { startWatch } from '../temps/startWatch'
+import { startWatch } from '../schedules/startWatch'
 
 export default async function clientReadyListener(client: Client<true>) {
   try {

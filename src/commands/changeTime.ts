@@ -1,6 +1,5 @@
 import {
   ActionRowBuilder,
-  ChannelType,
   ComponentType,
   EmbedBuilder,
   StringSelectMenuBuilder,
@@ -10,48 +9,44 @@ import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
 import { SlashCommand } from '../types/SlashCommand'
-import ChannelRepository from '../repositories/ChannelRepository'
-import ChannelService from '../services/ChannelService'
+import { dbConnect } from '../mongoose'
+import Container from 'typedi'
+import ScheduleService from '../services/schedule.service'
 
-export const changeChannel: SlashCommand = {
-  name: '채널변경',
-  description: '워치리스트 알림 채널을 변경할 수 있어요.',
+const MINIMUM_TIME_SELECT = 1
+const MAXIMUM_TIME_SELECT = 3
+
+export const changeTime: SlashCommand = {
+  name: '시간변경',
+  description: '워치리스트 알림 시간을 변경할 수 있어요.',
   execute: async (interaction) => {
     try {
+      await dbConnect()
+
       // define services
+      const scheduleService = Container.get(ScheduleService)
 
-      const channelRepository = new ChannelRepository()
-      const channelService = new ChannelService(channelRepository)
-
-      const guildId = interaction.guildId
-      const textChannels = interaction.guild.channels.cache
-        .filter((channel) => channel.type === ChannelType.GuildText)
-        .map((elem) => {
-          return {
-            name: elem.name,
-            id: elem.id,
-          }
-        })
+      const { guildId } = interaction
 
       // create view
       const descriptionEmbed = new EmbedBuilder()
         .setColor(COLORS.embedColor.primary)
-        .setDescription('워치리스트 알림을 받을 채널을 선택해주세요.')
+        .setDescription(
+          '워치리스트 알림 시간을 변경할 수 있어요.\n최대 3개의 시간을 선택할 수 있어요.',
+        )
 
       const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('change_channel')
-        .setPlaceholder('채널을 선택해주세요.')
-        .setMinValues(1)
-        .setMaxValues(1)
+        .setCustomId('change_time')
+        .setPlaceholder('시간을 선택해주세요.')
+        .setMinValues(MINIMUM_TIME_SELECT)
+        .setMaxValues(MAXIMUM_TIME_SELECT)
 
-      for (const channel of textChannels) {
+      for (let i = 0; i <= 23; i++) {
         selectMenu.addOptions(
           new StringSelectMenuOptionBuilder()
-            .setLabel(channel.name)
-            .setValue(channel.id)
-            .setDescription(
-              `워치리스트 알림을 \`${channel.name}\` 채널로 보낼게요.`,
-            ),
+            .setLabel(`${i}시`)
+            .setValue(i.toString())
+            .setDescription(`${i}시에 갱신된 전적을 보내드릴게요.`),
         )
       }
 
@@ -67,24 +62,34 @@ export const changeChannel: SlashCommand = {
       const userInteraction = await interaction.channel.awaitMessageComponent({
         componentType: ComponentType.StringSelect,
         filter: (i) =>
-          i.user.id === interaction.user.id && i.customId === 'change_channel',
+          i.customId === 'change_time' && i.user.id === interaction.user.id,
         time: 30_000,
       })
 
-      const selectedChannelId = userInteraction.values[0]
-      const selectedChannelName = textChannels.find(
-        ({ id }) => id === selectedChannelId,
-      ).name
+      const selectedTimes = userInteraction.values.map((value) =>
+        parseInt(value),
+      )
 
-      // update channel
-      await channelService.updateTextChannel(guildId, selectedChannelId)
+      selectedTimes.sort((a, b) => a - b)
+
+      // update schedule
+      // 1. 기존의 해당 guild의 schedule을 모두 삭제
+      await scheduleService.deleteSchedules(guildId)
+
+      // 2. 새로운 시간을 등록
+      await scheduleService.createSchedules([
+        ...selectedTimes.map((time) => ({
+          guildId,
+          time: time.toString(),
+        })),
+      ])
 
       return await userInteraction.update({
         embeds: [
           new EmbedBuilder()
             .setColor(COLORS.embedColor.success)
             .setDescription(
-              `워치리스트 알림 채널이 \`${selectedChannelName}\` 로 변경되었어요.`,
+              `워치리스트 알림 시간이 ${selectedTimes.join(', ')}시로 변경되었어요.`,
             ),
         ],
         components: [],

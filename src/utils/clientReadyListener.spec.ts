@@ -1,7 +1,7 @@
 import clientReadyListener from './clilentReadyListener'
 import commands from '../commands'
 import { getClientMock } from '../mocks/client.mock'
-import * as StartWatch from '../temps/startWatch'
+import * as StartWatch from '../schedules/startWatch'
 import * as SendLogMessage from './sendLogMessage'
 import { Client } from 'discord.js'
 
