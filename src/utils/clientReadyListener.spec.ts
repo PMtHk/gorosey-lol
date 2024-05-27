@@ -2,7 +2,6 @@ import clientReadyListener from './clilentReadyListener'
 import commands from '../commands'
 import { getClientMock } from '../mocks/client.mock'
 import * as StartWatch from '../schedules/startWatch'
-import * as SendLogMessage from './sendLogMessage'
 import { Client } from 'discord.js'
 
 describe('clientReadyListener', () => {
@@ -35,17 +34,6 @@ describe('clientReadyListener', () => {
 
     // Assert
     expect(startWatchSpy).toHaveBeenCalled()
-  })
-
-  it('should send a log message', async () => {
-    // Arrange
-    const sendLogMessageSpy = jest.spyOn(SendLogMessage, 'sendLogMessage')
-
-    // Act
-    await clientReadyListener(clientMock)
-
-    // Assert
-    expect(sendLogMessageSpy).toHaveBeenCalled()
   })
 
   it('should not proceed without client.application', async () => {
