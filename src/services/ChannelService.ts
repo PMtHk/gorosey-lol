@@ -91,6 +91,21 @@ export default class ChannelService {
     return channels
   }
 
+  public async createChannel(
+    guildId: string,
+    textChannelId: string,
+  ): Promise<void> {
+    const channel = await this.channelRepository.read(guildId)
+
+    if (channel)
+      throw new BadRequestError(
+        'ChannelService.createChannel() error: channel already exists.',
+        '이미 채널이 존재합니다.',
+      )
+
+    await this.channelRepository.create(guildId, textChannelId)
+  }
+
   public async deleteChannel(guildId: string): Promise<void> {
     const deletedChannel = await this.channelRepository.delete(guildId)
 
@@ -99,5 +114,12 @@ export default class ChannelService {
         'ChannelService.deleteChannel() error: channel does not exist.',
         '해당 채널이 존재하지 않습니다.',
       )
+  }
+
+  public async updateTextChannel(
+    guildId: string,
+    textChannelId: string,
+  ): Promise<void> {
+    await this.channelRepository.update(guildId, undefined, textChannelId)
   }
 }
