@@ -14,6 +14,7 @@ export const startWatch = (client: Client<boolean>) => {
   cron.schedule(
     '0 * * * *', // every hour
     async (now) => {
+      let counter = 0
       try {
         // define services
         const summonerService = Container.get(SummonerService)
@@ -39,17 +40,26 @@ export const startWatch = (client: Client<boolean>) => {
           const { textChannel, watchList } = channelInfo
 
           if (!watchList || watchList.length === 0) continue
+          counter += watchList.length
 
           const targetTextChannel = (await client.channels.fetch(
             textChannel,
           )) as TextChannel
 
+          const {
+            guild: { name: guildName },
+            name: channelName,
+          } = targetTextChannel
+
+          console.log(
+            `[INFO][${new Date().toLocaleString()}] ${guildName}|${channelName} request ${watchList.length} refreshment`,
+          )
+
           const embedsToSend = []
 
           for await (const riotPuuid of watchList) {
             const summoner = await summonerService.refresh(riotPuuid)
-            const summonerId = summoner.summonerId
-            const rankStat = await rankStatService.refresh(summonerId)
+            const rankStat = await rankStatService.refresh(summoner.summonerId)
             const matchHistories = await matchHistoryService.refresh(riotPuuid)
 
             embedsToSend.push(
@@ -64,6 +74,10 @@ export const startWatch = (client: Client<boolean>) => {
           await targetTextChannel.send({
             embeds: embedsToSend,
           })
+
+          console.log(
+            `[INFO][${new Date().toLocaleString()}] total ${counter} refreshed`,
+          )
         }
       } catch (error) {
         console.log(error)

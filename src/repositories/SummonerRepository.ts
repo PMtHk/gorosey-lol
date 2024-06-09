@@ -81,8 +81,9 @@ export default class SummonerRepository {
           profileIconId,
           lastUpdatedAt: Date.now(),
         },
-        { new: true },
+        { new: true, upsert: true },
       )
+
       return updatedSummoner
     } catch (error) {
       throw new DatabaseError(
