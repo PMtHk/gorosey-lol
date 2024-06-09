@@ -94,7 +94,7 @@ export default class RankStatRepository {
           RANKED_FLEX_SR,
           lastUpdatedAt: Date.now(),
         },
-        { new: true },
+        { new: true, upsert: true },
       )
 
       return updatedRankStat
