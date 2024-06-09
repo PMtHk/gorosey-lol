@@ -1,17 +1,17 @@
 import { Guild } from 'discord.js'
 import ChannelService from '../services/ChannelService'
-import ChannelRepository from '../repositories/ChannelRepository'
+import Container from 'typedi'
+import ScheduleService from '../services/schedule.service'
 
 export default async function guildDeleteListener(guild: Guild) {
   try {
     const { id: guildId } = guild
 
-    const channelRepository = new ChannelRepository()
-    const channelService = new ChannelService(channelRepository)
+    const channelService = Container.get(ChannelService)
+    const scheduleService = Container.get(ScheduleService)
 
     await channelService.deleteChannel(guildId)
-
-    // TODO: delete all schedules related to the guild
+    await scheduleService.deleteSchedules(guildId)
   } catch (error) {
     console.log('guildDeleteListener error: ', error)
   }
