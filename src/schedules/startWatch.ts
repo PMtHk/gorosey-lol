@@ -77,9 +77,8 @@ export const startWatch = (client: Client<boolean>) => {
         }
 
         // log
-        console.log(
-          `[INFO][${new Date().toLocaleString()}] total ${counter} refreshed`,
-        )
+        if (counter > 0)
+          console.log(`[INFO][startWatch] total ${counter} summoners refreshed`)
       } catch (error) {
         console.log(error)
       }
