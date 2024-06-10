@@ -9,23 +9,28 @@ if (!KOREAN_DISCORD_LIST_TOKEN)
 // post request to koreanbots to update gorosey-lol server count
 export default async function updateServerCount(serverCount: number) {
   try {
-    const response = await fetch(
-      `https://koreanbots.dev/api/v2/bots/${DISCORD_APPLICATION_ID}/stats`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: KOREAN_DISCORD_LIST_TOKEN,
-        },
-        body: JSON.stringify({
-          servers: serverCount,
-        }),
-      },
-    )
+    const { servers } = await fetch(
+      `https://koreanbots.dev/api/v2/bots/${DISCORD_APPLICATION_ID}`,
+    ).then((res) => res.json())
 
-    if (response.status === 200) {
-      console.log(
-        `[INFO][${new Date().toLocaleString()}][updateServerCount] : updated server count to ${serverCount} successfully`,
-      )
+    if (servers !== serverCount) {
+      const { code } = await fetch(
+        `https://koreanbots.dev/api/v2/bots/${DISCORD_APPLICATION_ID}/stats`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: KOREAN_DISCORD_LIST_TOKEN,
+          },
+          body: JSON.stringify({
+            servers: serverCount,
+          }),
+        },
+      ).then((res) => res.json())
+
+      if (code === 200)
+        console.log(
+          `[INFO][updateServerCount] done successfully. new servers = ${serverCount}`,
+        )
     }
 
     return

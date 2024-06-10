@@ -11,7 +11,7 @@ export default async function clientReadyListener(client: Client<true>) {
     if (process.env.NODE_ENV === 'production')
       setInterval(
         async () => await updateServerCount(client.guilds.cache.size),
-        1000 * 60 * 60, // 1 hour
+        1000 * 60 * 60 * 12, // 12 hour
       )
 
     // create slashCommands
