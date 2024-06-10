@@ -74,11 +74,12 @@ export const startWatch = (client: Client<boolean>) => {
           await targetTextChannel.send({
             embeds: embedsToSend,
           })
-
-          console.log(
-            `[INFO][${new Date().toLocaleString()}] total ${counter} refreshed`,
-          )
         }
+
+        // log
+        console.log(
+          `[INFO][${new Date().toLocaleString()}] total ${counter} refreshed`,
+        )
       } catch (error) {
         console.log(error)
       }
