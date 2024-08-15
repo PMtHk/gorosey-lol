@@ -16,10 +16,10 @@ if (!ALERT_CHANNEL_CHAT_CHANNELID) {
   throw new Error('[ENV] ALERT_CHANNEL_CHAT_CHANNELID를 불러올 수 없습니다.')
 }
 
-const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits
+const { Guilds, GuildMessages } = GatewayIntentBits
 
 const client = new Client({
-  intents: [Guilds, GuildMessages, MessageContent],
+  intents: [Guilds, GuildMessages],
 })
 
 client.once(Events.ClientReady, clientReadyListener)
