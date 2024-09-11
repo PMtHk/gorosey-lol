@@ -31,15 +31,17 @@ export const startWatch = (client: Client<boolean>) => {
 
         const channelInfos = schedules.map((schedule) => {
           return {
-            textChannel: schedule.guildId.textChannel,
-            watchList: schedule.guildId.watchList,
+            textChannel: schedule.guildId?.textChannel,
+            watchList: schedule.guildId?.watchList,
           }
         })
 
         for await (const channelInfo of channelInfos) {
           const { textChannel, watchList } = channelInfo
 
+          if (!textChannel) continue
           if (!watchList || watchList.length === 0) continue
+
           counter += watchList.length
 
           const targetTextChannel = (await client.channels.fetch(
