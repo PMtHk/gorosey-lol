@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build": "tsc -p tsconfig-build.json",
-    "dev": "node --env-file=.env --watch -r ts-node/register src/server.ts",
+    "dev": "node --env-file=.env.local --watch -r ts-node/register src/server.ts",
     "test": "jest",
     "format": "prettier --write . --ignore-path .gitignore",
     "lint": "eslint src/**/*.ts"
@@ -14,6 +14,7 @@
   "author": "Jooyeob Na <zooby88@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.7",
     "@types/node-cron": "^3.0.11",
