@@ -57,7 +57,7 @@ function startServer(port: number = PORT) {
       initBot()
     })
   } catch (e) {
-    console.error('서버를 시작하는 중에 문제가 발생했습니다.')
+    console.error('[EXPRESS] 서버를 시작하는 중에 문제가 발생했습니다.')
   }
 }
 

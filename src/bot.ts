@@ -7,29 +7,34 @@ import guildCreateListener from './utils/guildCreateListener'
 
 dotenv.config()
 
-const { DISCORD_TOKEN, ALERT_CHANNEL_CHAT_CHANNELID } = process.env
+const ERRORS = {
+  DISCORD_TOKEN_MISSING: '[ENV] DISCORD_TOKEN 이 정의되지 않았습니다.',
+} as const
+
+const INTENTS = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+] as const
+
+const { DISCORD_TOKEN } = process.env
+
 if (!DISCORD_TOKEN) {
-  throw new Error('[ENV] DISCORD_TOKEN을 불러올 수 없습니다.')
+  console.error(ERRORS.DISCORD_TOKEN_MISSING)
+  process.exit(1)
 }
-
-if (!ALERT_CHANNEL_CHAT_CHANNELID) {
-  throw new Error('[ENV] ALERT_CHANNEL_CHAT_CHANNELID를 불러올 수 없습니다.')
-}
-
-const { Guilds, GuildMessages } = GatewayIntentBits
 
 const client = new Client({
-  intents: [Guilds, GuildMessages],
+  intents: INTENTS,
 })
 
 client.once(Events.ClientReady, clientReadyListener)
-
 client.on(Events.InteractionCreate, slashCommandHandler)
-
 client.on(Events.GuildCreate, guildCreateListener)
-
 client.on(Events.GuildDelete, guildDeleteListener)
 
-export const initBot = () => {
-  client.login(DISCORD_TOKEN)
+export function initBot(): void {
+  client.login(process.env.DISCORD_TOKEN).catch((error) => {
+    console.error('[BOT] 로그인 실패:', error)
+    process.exit(1)
+  })
 }
