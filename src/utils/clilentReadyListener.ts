@@ -1,9 +1,7 @@
 import { Client } from 'discord.js'
 import commands from '../commands'
 import { startWatch } from '../schedules/startWatch'
-import updateServerCount from './updateServerCount'
-
-const UPDATE_SERVER_COUNT_INTERVAL = 1000 * 60 * 60 * 24 // 24시간
+import { UPDATE_SERVER_COUNT_INTERVAL, koreanBots } from '../libs/koreanbots'
 
 function createSlashCommands(client: Client) {
   return Promise.all(
@@ -24,7 +22,10 @@ export default async function clientReadyListener(client: Client) {
       const { cache } = client.guilds
 
       setInterval(
-        async () => await updateServerCount(cache.size),
+        async () =>
+          await koreanBots.updateStats({
+            servers: cache.size,
+          }),
         UPDATE_SERVER_COUNT_INTERVAL,
       )
     }
