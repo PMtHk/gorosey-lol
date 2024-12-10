@@ -1,0 +1,1 @@
+export const UPDATE_SERVER_COUNT_INTERVAL = 1000 * 60 * 60 * 24
