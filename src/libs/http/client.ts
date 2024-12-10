@@ -40,6 +40,22 @@ export class HttpClient {
     }
   }
 
+  async get<T>(path: string, config?: Omit<RequestConfig, 'body'>): Promise<T> {
+    return this.fetch(path, { ...config, method: 'GET' })
+  }
+
+  async post<T>(
+    path: string,
+    body?: unknown,
+    config?: RequestConfig,
+  ): Promise<T> {
+    return this.fetch<T>(path, {
+      ...config,
+      method: 'POST',
+      body,
+    })
+  }
+
   private getURL(path: string): string {
     return (
       this.config.baseURL.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '')
