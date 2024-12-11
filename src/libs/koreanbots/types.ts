@@ -3,7 +3,7 @@ export interface UpdateBotStatDto {
   shards?: number
 }
 
-export interface UpdateBotStatResponse {
+export interface UpdateBotStatResponseDto {
   code: number
   version: number
   message: string

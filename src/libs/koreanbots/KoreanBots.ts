@@ -1,5 +1,5 @@
 import { HttpClient } from '../http'
-import { UpdateBotStatDto, UpdateBotStatResponse } from './types'
+import { UpdateBotStatDto, UpdateBotStatResponseDto } from './types'
 import { KoreanBotsError } from './error'
 
 const { DISCORD_APPLICATION_ID, KOREAN_DISCORD_LIST_TOKEN } = process.env
@@ -29,8 +29,10 @@ export class KoreanBots {
     })
   }
 
-  async updateStats(stats: UpdateBotStatDto): Promise<UpdateBotStatResponse> {
-    const response = await this.http.post<UpdateBotStatResponse>(
+  public async updateStats(
+    stats: UpdateBotStatDto,
+  ): Promise<UpdateBotStatResponseDto> {
+    const response = await this.http.post<UpdateBotStatResponseDto>(
       `${this.applicationId}/stats`,
       stats,
     )
