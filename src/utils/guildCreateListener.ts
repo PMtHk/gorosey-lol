@@ -22,6 +22,6 @@ export default async function guildCreateListener(guild: Guild) {
     await channelService.createChannel(guildId, textChannels[0].id)
     await scheduleService.createSchedules([{ guildId, time: '0' }])
   } catch (error) {
-    console.log('guildCreateListener error: ', error)
+    console.error('guildCreateListener error: ', error)
   }
 }

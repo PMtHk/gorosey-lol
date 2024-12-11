@@ -10,7 +10,7 @@ import ScheduleService from '../services/schedule.service'
 import { detailedSummonerView } from '../views/DetailedSummonerView'
 import { dbConnect } from '../mongoose'
 
-export const startWatch = (client: Client<boolean>) => {
+export const startWatch = (client: Client) => {
   cron.schedule(
     '0 * * * *', // every hour
     async (now) => {
@@ -53,7 +53,7 @@ export const startWatch = (client: Client<boolean>) => {
             name: channelName,
           } = targetTextChannel
 
-          console.log(
+          console.info(
             `[INFO][${new Date().toLocaleString()}] ${guildName}|${channelName} request ${watchList.length} refreshment`,
           )
 
@@ -82,7 +82,7 @@ export const startWatch = (client: Client<boolean>) => {
         if (counter > 0)
           console.log(`[INFO][startWatch] total ${counter} summoners refreshed`)
       } catch (error) {
-        console.log(error)
+        console.error('cron error: ', error)
       }
     },
     {

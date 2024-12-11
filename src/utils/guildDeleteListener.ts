@@ -13,6 +13,6 @@ export default async function guildDeleteListener(guild: Guild) {
     await channelService.deleteChannel(guildId)
     await scheduleService.deleteSchedules(guildId)
   } catch (error) {
-    console.log('guildDeleteListener error: ', error)
+    console.error('guildDeleteListener error: ', error)
   }
 }

@@ -5,7 +5,7 @@ export abstract class CustomError extends Error {
     super(message)
 
     Error.captureStackTrace(this, this.constructor)
-    console.log(
+    console.error(
       `[${new Date().toLocaleString()}] ${this.constructor.name} | ${this.message}`,
     )
   }
