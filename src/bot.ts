@@ -1,9 +1,11 @@
 import * as dotenv from 'dotenv'
 import { Client, Events, GatewayIntentBits } from 'discord.js'
-import slashCommandHandler from './utils/interactionListener'
-import clientReadyListener from './utils/clilentReadyListener'
-import guildDeleteListener from './utils/guildDeleteListener'
-import guildCreateListener from './utils/guildCreateListener'
+import {
+  clientReadyListener,
+  guildCreateListener,
+  guildDeleteListener,
+  interactionCreateListener,
+} from './listeners'
 
 dotenv.config()
 
@@ -23,12 +25,10 @@ if (!DISCORD_TOKEN) {
   process.exit(1)
 }
 
-const client = new Client({
-  intents: INTENTS,
-})
+const client = new Client({ intents: INTENTS })
 
 client.once(Events.ClientReady, clientReadyListener)
-client.on(Events.InteractionCreate, slashCommandHandler)
+client.on(Events.InteractionCreate, interactionCreateListener)
 client.on(Events.GuildCreate, guildCreateListener)
 client.on(Events.GuildDelete, guildDeleteListener)
 

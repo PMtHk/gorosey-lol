@@ -1,5 +1,5 @@
 import { Client } from 'discord.js'
-import commands from '../commands'
+import { commands } from '../commands'
 import { startWatch } from '../schedules/startWatch'
 import { UPDATE_SERVER_COUNT_INTERVAL, koreanBots } from '../libs/koreanbots'
 
@@ -9,7 +9,7 @@ function createSlashCommands(client: Client) {
   )
 }
 
-export default async function clientReadyListener(client: Client) {
+export async function clientReadyListener(client: Client) {
   console.log('Bot is starting')
 
   try {
@@ -22,10 +22,7 @@ export default async function clientReadyListener(client: Client) {
       const { cache } = client.guilds
 
       setInterval(
-        async () =>
-          await koreanBots.updateStats({
-            servers: cache.size,
-          }),
+        async () => await koreanBots.updateStats({ servers: cache.size }),
         UPDATE_SERVER_COUNT_INTERVAL,
       )
     }
@@ -34,7 +31,7 @@ export default async function clientReadyListener(client: Client) {
 
     startWatch(client)
   } catch (error) {
-    console.error('clientReadyListener error: ', error)
+    console.error('[ClientReady] ', error)
   } finally {
     console.log('Bot is ready')
   }

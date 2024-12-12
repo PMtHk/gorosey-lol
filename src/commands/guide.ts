@@ -1,4 +1,4 @@
-import commands from '.'
+import { commands } from '.'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
 import { SlashCommand } from '../types/SlashCommand'

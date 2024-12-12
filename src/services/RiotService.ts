@@ -10,7 +10,7 @@ import {
   MatchesDto,
   MatchDto,
 } from '../types/riot.dtos'
-import { riotInstance } from '../utils/riotInstance'
+import { riotInstance } from '../libs/riotInstance'
 
 @Service()
 export default class RiotService {

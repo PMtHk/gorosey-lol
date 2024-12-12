@@ -7,7 +7,7 @@ import { watchList } from './watchList'
 import { changeChannel } from './changeChannel'
 import { changeTime } from './changeTime'
 
-const commands = [
+export const commands = [
   ping,
   search,
   register,
@@ -17,5 +17,3 @@ const commands = [
   changeChannel,
   changeTime,
 ]
-
-export default commands
