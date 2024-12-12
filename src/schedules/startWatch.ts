@@ -9,78 +9,82 @@ import ScheduleService from '../services/schedule.service'
 
 import { detailedSummonerView } from '../views/DetailedSummonerView'
 import { dbConnect } from '../mongoose'
+import { ISchedulePopulated } from '../models/schedule.model'
+
+const extractTextChannelIdAndWatchList = (schedule: ISchedulePopulated) => ({
+  textChannel: schedule.guildId?.textChannel,
+  watchList: schedule.guildId?.watchList,
+})
 
 export const startWatch = (client: Client) => {
   cron.schedule(
     '0 * * * *', // every hour
     async (now) => {
-      let counter = 0
+      let guildCounter = 0
+      let summonerCounter = 0
+
+      const summonerService = Container.get(SummonerService)
+      const rankStatService = Container.get(RankStatService)
+      const matchHistoryService = Container.get(MatchHistoryService)
+      const scheduleService = Container.get(ScheduleService)
+
+      const fetchSummonerDetails = async (riotPuuid: string) => {
+        const summoner = await summonerService.refresh(riotPuuid)
+        const [rankStat, matchHistories] = await Promise.all([
+          rankStatService.refresh(summoner.summonerId),
+          matchHistoryService.refresh(riotPuuid),
+        ])
+
+        return { summoner, rankStat, matchHistories }
+      }
+
+      const createEmbeds = (watchList: string[]) =>
+        Promise.all(
+          watchList.map(async (riotPuuid) => {
+            const details = await fetchSummonerDetails(riotPuuid)
+            return detailedSummonerView.createEmbed(details)
+          }),
+        )
+
       try {
-        // define services
-        const summonerService = Container.get(SummonerService)
-        const rankStatService = Container.get(RankStatService)
-        const matchHistoryService = Container.get(MatchHistoryService)
-        const scheduleService = Container.get(ScheduleService)
+        const schedules = await scheduleService.getSchedules(
+          new Date(now).getHours().toString(),
+        )
 
-        // db connection (sechdule 서비스 생성 후 제거할 예정)
-        await dbConnect()
+        const channelInfos = schedules.map(extractTextChannelIdAndWatchList)
 
-        const hour = new Date(now).getHours()
+        for (const channelInfo of channelInfos) {
+          guildCounter += 1
 
-        const schedules = await scheduleService.getSchedules(hour.toString())
+          try {
+            const { textChannel, watchList } = channelInfo
+            if (!textChannel || !watchList || watchList.length === 0) {
+              continue
+            }
 
-        const channelInfos = schedules.map((schedule) => {
-          return {
-            textChannel: schedule.guildId?.textChannel,
-            watchList: schedule.guildId?.watchList,
-          }
-        })
+            summonerCounter += watchList.length
 
-        for await (const channelInfo of channelInfos) {
-          const { textChannel, watchList } = channelInfo
+            const targetTextChannel = (await client.channels.fetch(
+              textChannel,
+            )) as TextChannel
 
-          if (!textChannel) continue
-          if (!watchList || watchList.length === 0) continue
+            await targetTextChannel.send({
+              embeds: await createEmbeds(watchList),
+            })
 
-          counter += watchList.length
+            const { guild, name: channelName } = targetTextChannel
 
-          const targetTextChannel = (await client.channels.fetch(
-            textChannel,
-          )) as TextChannel
-
-          const {
-            guild: { name: guildName },
-            name: channelName,
-          } = targetTextChannel
-
-          console.info(
-            `[INFO][${new Date().toLocaleString()}] ${guildName}|${channelName} request ${watchList.length} refreshment`,
-          )
-
-          const embedsToSend = []
-
-          for await (const riotPuuid of watchList) {
-            const summoner = await summonerService.refresh(riotPuuid)
-            const rankStat = await rankStatService.refresh(summoner.summonerId)
-            const matchHistories = await matchHistoryService.refresh(riotPuuid)
-
-            embedsToSend.push(
-              detailedSummonerView.createEmbed({
-                summoner,
-                rankStat,
-                matchHistories,
-              }),
+            console.info(
+              `[${new Date().toLocaleString()}] ${guild.name}|${channelName}|${watchList.length}-summoner`,
             )
+          } catch (error) {
+            console.error('channel error: ', error)
           }
-
-          await targetTextChannel.send({
-            embeds: embedsToSend,
-          })
         }
 
-        // log
-        if (counter > 0)
-          console.log(`[INFO][startWatch] total ${counter} summoners refreshed`)
+        console.info(
+          `[${new Date().toLocaleString()}] ${guildCounter}-guild|${summonerCounter}-summoner`,
+        )
       } catch (error) {
         console.error('cron error: ', error)
       }
