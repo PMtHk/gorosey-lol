@@ -6,22 +6,20 @@ import { ISchedulePopulated } from '../models/schedule.model'
 export default class ScheduleService {
   constructor(private scheduleRepository: ScheduleRepository) {}
 
-  public async getSchedules(time?: string): Promise<ISchedulePopulated[]> {
-    const schedules = await this.scheduleRepository.findAll(time)
-
-    return schedules
+  public getSchedules(time?: string): Promise<ISchedulePopulated[]> {
+    return this.scheduleRepository.findAll(time)
   }
 
-  public async createSchedules(
+  public createSchedules(
     params: Array<{
       guildId: string
       time: string
     }>,
   ): Promise<void> {
-    await this.scheduleRepository.createMany(params)
+    return this.scheduleRepository.createMany(params)
   }
 
-  public async deleteSchedules(guildId: string): Promise<void> {
-    await this.scheduleRepository.deleteMany(guildId)
+  public deleteSchedules(guildId: string): Promise<void> {
+    return this.scheduleRepository.deleteMany(guildId)
   }
 }
