@@ -1,5 +1,5 @@
 import RiotService from './RiotService'
-import { riotInstance } from '../utils/riotInstance'
+import { riotInstance } from '../libs/riotInstance'
 import { SummonerNotFoundError } from '../errors/NotFoundError'
 import { BadRequestError } from '../errors/BadReqeustError'
 import { LeagueEntryDto } from '../types/riot.dtos'
