@@ -1,14 +1,11 @@
-import { Client, TextChannel } from 'discord.js'
+import { Client, DiscordAPIError, TextChannel } from 'discord.js'
 import cron from 'node-cron'
 import Container from 'typedi'
-
 import MatchHistoryService from '../services/MatchHistoryService'
 import RankStatService from '../services/RankStatService'
 import SummonerService from '../services/SummonerService'
 import ScheduleService from '../services/schedule.service'
-
 import { detailedSummonerView } from '../views/DetailedSummonerView'
-import { dbConnect } from '../mongoose'
 import { ISchedulePopulated } from '../models/schedule.model'
 
 const extractTextChannelIdAndWatchList = (schedule: ISchedulePopulated) => ({
@@ -20,9 +17,6 @@ export const startWatch = (client: Client) => {
   cron.schedule(
     '0 * * * *', // every hour
     async (now) => {
-      let guildCounter = 0
-      let summonerCounter = 0
-
       const summonerService = Container.get(SummonerService)
       const rankStatService = Container.get(RankStatService)
       const matchHistoryService = Container.get(MatchHistoryService)
@@ -46,44 +40,40 @@ export const startWatch = (client: Client) => {
           }),
         )
 
+      const sendWatchList = async (channelInfo: {
+        textChannel: string
+        watchList: string[]
+      }) => {
+        try {
+          const { textChannel, watchList } = channelInfo
+          if (!textChannel || !watchList || watchList.length === 0) {
+            return
+          }
+
+          const targetTextChannel = (await client.channels.fetch(
+            textChannel,
+          )) as TextChannel
+
+          await targetTextChannel.send({
+            embeds: await createEmbeds(watchList),
+          })
+        } catch (error) {
+          const { code, message } = error as DiscordAPIError
+          console.error(`[${code}] ${message}`)
+          // TODO: 아래의 에러 코드 별 처리 필요
+          // 10003: Unknown Channel
+          // 50001: Missing Access
+          // 50013: Missing Permissions
+        }
+      }
+
       try {
         const schedules = await scheduleService.getSchedules(
           new Date(now).getHours().toString(),
         )
 
-        const channelInfos = schedules.map(extractTextChannelIdAndWatchList)
-
-        for (const channelInfo of channelInfos) {
-          guildCounter += 1
-
-          try {
-            const { textChannel, watchList } = channelInfo
-            if (!textChannel || !watchList || watchList.length === 0) {
-              continue
-            }
-
-            summonerCounter += watchList.length
-
-            const targetTextChannel = (await client.channels.fetch(
-              textChannel,
-            )) as TextChannel
-
-            await targetTextChannel.send({
-              embeds: await createEmbeds(watchList),
-            })
-
-            const { guild, name: channelName } = targetTextChannel
-
-            console.info(
-              `[${new Date().toLocaleString()}] ${guild.name}|${channelName}|${watchList.length}-summoner`,
-            )
-          } catch (error) {
-            console.error('channel error: ', error)
-          }
-        }
-
-        console.info(
-          `[${new Date().toLocaleString()}] ${guildCounter}-guild|${summonerCounter}-summoner`,
+        await Promise.all(
+          schedules.map(extractTextChannelIdAndWatchList).map(sendWatchList),
         )
       } catch (error) {
         console.error('cron error: ', error)
