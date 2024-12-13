@@ -8,7 +8,7 @@ export class HttpClient {
     this.config.timeout = config.timeout ?? DEFAULT_TIMEOUT
   }
 
-  async fetch<T>(path: string, config?: RequestConfig): Promise<T> {
+  async fetch<T>(path: string, config?: RequestConfig) {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
 
@@ -40,15 +40,11 @@ export class HttpClient {
     }
   }
 
-  async get<T>(path: string, config?: Omit<RequestConfig, 'body'>): Promise<T> {
-    return this.fetch(path, { ...config, method: 'GET' })
+  async get<T>(path: string, config?: Omit<RequestConfig, 'body'>) {
+    return this.fetch<T>(path, { ...config, method: 'GET' })
   }
 
-  async post<T>(
-    path: string,
-    body?: unknown,
-    config?: RequestConfig,
-  ): Promise<T> {
+  async post<T>(path: string, body?: unknown, config?: RequestConfig) {
     return this.fetch<T>(path, {
       ...config,
       method: 'POST',

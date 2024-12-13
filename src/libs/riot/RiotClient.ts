@@ -1,6 +1,7 @@
 import { HttpClient } from '../http'
 import { RiotErrorDto } from './types'
 import { isRiotErrorDto, RiotApiError } from './error'
+import { RateLimiter } from '../../utils/RateLimiter'
 
 export class RiotClient {
   private http: HttpClient
@@ -8,6 +9,7 @@ export class RiotClient {
   constructor(
     protected readonly baseURL: string,
     apiKey: string,
+    private readonly rateLimiter: RateLimiter,
   ) {
     this.http = new HttpClient({
       baseURL,
@@ -19,33 +21,25 @@ export class RiotClient {
 
   private readonly requestHandlers = {
     get: <T>(url: string) => this.http.get<T | RiotErrorDto>(url),
-    post: <T>(url: string, data?: unknown) =>
-      this.http.post<T | RiotErrorDto>(url, data),
   } as const
 
-  private async request<T>(
-    method: 'get' | 'post',
-    url: string,
-    data?: unknown,
-  ): Promise<T> {
-    const response = await this.requestHandlers[method](url, data)
+  private async request<T>(method: 'get', url: string) {
+    return this.rateLimiter.execute(async () => {
+      const response = await this.requestHandlers[method](url)
 
-    if (isRiotErrorDto(response)) {
-      throw new RiotApiError(
-        response.status.message,
-        response.status.status_code,
-        response,
-      )
-    }
+      if (isRiotErrorDto(response)) {
+        throw new RiotApiError(
+          response.status.message,
+          response.status.status_code,
+          response,
+        )
+      }
 
-    return response as T
+      return response as T
+    })
   }
 
-  public async get<T>(url: string): Promise<T> {
+  public async get<T>(url: string) {
     return this.request<T>('get', url)
-  }
-
-  public async post<T>(url: string, data?: unknown): Promise<T> {
-    return this.request<T>('post', url, data)
   }
 }
