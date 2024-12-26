@@ -1,11 +1,12 @@
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
+
 import { PATCH_VERSION } from '../constants/leagueoflegends'
 import { tierInfos } from '../constants/rank'
-import { IRankStat } from '../models/rankStat.model'
+import { IRankStat } from '../models/RankStat'
 import { elapsedTime } from '../utils/elapsedTime'
-import SummonerView, { SummonerViewDto } from './SummonerView'
+import { SummonerView, SummonerViewDto } from './SummonerView'
 
-class BasicSummonerView implements SummonerView {
+export class BasicSummonerView implements SummonerView {
   createEmbed(dto: SummonerViewDto) {
     const { summoner, rankStat } = dto
     const { gameName, tagLine, summonerLevel, profileIconId, lastUpdatedAt } =
@@ -71,5 +72,3 @@ class BasicSummonerView implements SummonerView {
 }
 
 export const basicSummonerView = new BasicSummonerView()
-
-export default BasicSummonerView

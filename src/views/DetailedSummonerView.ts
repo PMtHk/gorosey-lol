@@ -1,14 +1,14 @@
 import { champions } from '../constants/champions'
-import { IMatchHistory } from '../models/matchHistory.model'
+import { IMatchHistory } from '../models/MatchHistory'
 import { elapsedTime } from '../utils/elapsedTime'
 import { basicSummonerView } from './BasicSummonerView'
-import SummonerView, { SummonerViewDto } from './SummonerView'
+import { SummonerView, SummonerViewDto } from './SummonerView'
 
 export interface DetailedSummonerViewDto extends SummonerViewDto {
   matchHistories: Array<IMatchHistory>
 }
 
-class DetailedSummonerView implements SummonerView {
+export class DetailedSummonerView implements SummonerView {
   createEmbed(dto: DetailedSummonerViewDto) {
     const { summoner, rankStat, matchHistories } = dto
 
@@ -24,9 +24,8 @@ class DetailedSummonerView implements SummonerView {
     let rankedGameWinCount = 0
 
     matchHistories.forEach((match) => {
-      rankedGameCount++
-
-      if (match.win) rankedGameWinCount++
+      rankedGameCount += 1
+      rankedGameWinCount += match.win ? 1 : 0
 
       const KDA = `${match.kills}/${match.deaths}/${match.assists}`
 
@@ -38,7 +37,7 @@ class DetailedSummonerView implements SummonerView {
             : '정보 없음'
 
       WIN_AND_TYPE += `${match.win ? '✅ 승' : '❌ 패'} ${gameType}\n`
-      CHAMPION += `${champions[match.championName]}\n`
+      CHAMPION += `${champions[match.championName] || match.championName}\n`
       KDA_AND_TIME += `${KDA.padEnd(12, '\u00A0')} (${elapsedTime(match.gameEndTimestamp)})\n`
     })
 
@@ -74,5 +73,3 @@ class DetailedSummonerView implements SummonerView {
 }
 
 export const detailedSummonerView = new DetailedSummonerView()
-
-export default DetailedSummonerView
