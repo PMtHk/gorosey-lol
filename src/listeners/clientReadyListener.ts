@@ -1,7 +1,9 @@
 import { Client } from 'discord.js'
+import Container from 'typedi'
+
 import { commands } from '../commands'
-import { startWatch } from '../schedules/startWatch'
 import { UPDATE_SERVER_COUNT_INTERVAL, koreanBots } from '../libs/koreanbots'
+import { WatchService } from '../services/WatchService'
 
 function createSlashCommands(client: Client) {
   return Promise.all(
@@ -13,6 +15,8 @@ export async function clientReadyListener(client: Client) {
   console.log('Bot is starting')
 
   try {
+    const watchService = Container.get(WatchService)
+
     if (!client.application) {
       console.error('client.application is not available')
       return
@@ -29,7 +33,8 @@ export async function clientReadyListener(client: Client) {
 
     await createSlashCommands(client)
 
-    startWatch(client)
+    watchService.setClient(client)
+    watchService.startWatch()
   } catch (error) {
     console.error('[ClientReady] ', error)
   } finally {
