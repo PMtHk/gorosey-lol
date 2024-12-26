@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { IChannel } from './channel.model'
+import { IChannel } from './Channel'
 
 export interface ISchedule {
   _id: string

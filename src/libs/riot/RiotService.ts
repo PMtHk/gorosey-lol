@@ -6,7 +6,9 @@ import {
   MatchesDto,
   SummonerDto,
 } from './types'
+import { Service } from 'typedi'
 
+@Service()
 export class RiotService {
   private readonly kr = riotClientFactory.getClient('kr')
 
@@ -57,7 +59,7 @@ export class RiotService {
 
     const queryString = new URLSearchParams(params)
     return this.asia.get<MatchesDto>(
-      `/riot/match/v5/matches/by-puuid/${riotPuuid}/ids?${queryString}`,
+      `/lol/match/v5/matches/by-puuid/${riotPuuid}/ids?${queryString}`,
     )
   }
 
@@ -65,3 +67,5 @@ export class RiotService {
     return this.asia.get<MatchDto>(`/lol/match/v5/matches/${matchId}`)
   }
 }
+
+export const riotService = new RiotService()
