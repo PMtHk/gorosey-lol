@@ -1,59 +1,72 @@
 import { Service } from 'typedi'
-import { DatabaseError } from '../errors/DatabaseError'
-import Summoner, { ISummoner } from '../models/summoner.model'
-import { dbConnect } from '../mongoose'
+import Summoner, { ISummoner } from '../models/Summoner'
+
+export interface CreateSummonerParams {
+  riotPuuid: string
+  gameName: string
+  tagLine: string
+  summonerId: string
+  summonerLevel: number
+  profileIconId: number
+}
+
+export interface UpdateSummonerParams {
+  riotPuuid: string
+  gameName: string
+  tagLine: string
+  summonerId: string
+  summonerLevel: number
+  profileIconId: number
+}
 
 @Service()
-export default class SummonerRepository {
-  public async create({
+export class SummonerRepository {
+  public create({
     riotPuuid,
     gameName,
     tagLine,
     summonerId,
     summonerLevel,
     profileIconId,
-  }: {
-    riotPuuid: string
-    gameName: string
-    tagLine: string
-    summonerId: string
-    summonerLevel: number
-    profileIconId: number
-  }): Promise<ISummoner> {
-    try {
-      await dbConnect()
+  }: CreateSummonerParams): Promise<ISummoner> {
+    return Summoner.create({
+      _id: riotPuuid,
+      gameName,
+      tagLine,
+      summonerId,
+      summonerLevel,
+      profileIconId,
+      lastUpdatedAt: Date.now(),
+    })
+  }
 
-      const createdSummoner = await Summoner.create({
-        _id: riotPuuid,
+  public read(riotPuuid: string): Promise<ISummoner> {
+    return Summoner.findById(riotPuuid).lean()
+  }
+
+  public update({
+    riotPuuid,
+    gameName,
+    tagLine,
+    summonerId,
+    summonerLevel,
+    profileIconId,
+  }: UpdateSummonerParams): Promise<ISummoner> {
+    return Summoner.findByIdAndUpdate(
+      riotPuuid,
+      {
         gameName,
         tagLine,
         summonerId,
         summonerLevel,
         profileIconId,
         lastUpdatedAt: Date.now(),
-      })
-      return createdSummoner
-    } catch (error) {
-      throw new DatabaseError(
-        'SummonerRepository.create() error: ' + error.message,
-      )
-    }
+      },
+      { new: true, upsert: true },
+    )
   }
 
-  public async read(riotPuuid: string): Promise<ISummoner> {
-    try {
-      await dbConnect()
-
-      const summoner = await Summoner.findById(riotPuuid).lean()
-      return summoner
-    } catch (error) {
-      throw new DatabaseError(
-        'SummonerRepository.read() error: ' + error.message,
-      )
-    }
-  }
-
-  public async update({
+  public upsert({
     riotPuuid,
     gameName,
     tagLine,
@@ -68,27 +81,17 @@ export default class SummonerRepository {
     summonerLevel: number
     profileIconId: number
   }): Promise<ISummoner> {
-    try {
-      await dbConnect()
-
-      const updatedSummoner = await Summoner.findByIdAndUpdate(
-        riotPuuid,
-        {
-          gameName,
-          tagLine,
-          summonerId,
-          summonerLevel,
-          profileIconId,
-          lastUpdatedAt: Date.now(),
-        },
-        { new: true, upsert: true },
-      )
-
-      return updatedSummoner
-    } catch (error) {
-      throw new DatabaseError(
-        'SummonerRepository.update() error: ' + error.message,
-      )
-    }
+    return Summoner.findByIdAndUpdate(
+      riotPuuid,
+      {
+        gameName,
+        tagLine,
+        summonerId,
+        summonerLevel,
+        profileIconId,
+        lastUpdatedAt: Date.now(),
+      },
+      { new: true, upsert: true },
+    )
   }
 }

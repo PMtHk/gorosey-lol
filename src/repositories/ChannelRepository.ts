@@ -1,93 +1,41 @@
 import { Service } from 'typedi'
-import { DatabaseError } from '../errors/DatabaseError'
-import Channel, { IChannel } from '../models/channel.model'
-import { dbConnect } from '../mongoose'
+import Channel, { IChannel } from '../models/Channel'
 
 @Service()
-export default class ChannelRepository {
-  public async create(guildId: string, channelId: string): Promise<IChannel> {
-    try {
-      await dbConnect()
-
-      const createdChannel = await Channel.create({
-        _id: guildId,
-        textChannel: channelId,
-        watchList: [],
-      })
-
-      return createdChannel
-    } catch (error) {
-      throw new DatabaseError(
-        'ChannelRepository.create() error: ' + error.message,
-      )
-    }
+export class ChannelRepository {
+  public create(guildId: string, channelId: string): Promise<IChannel> {
+    return Channel.create({
+      _id: guildId,
+      textChannel: channelId,
+      watchList: [],
+    })
   }
 
-  public async read(guildId: string): Promise<IChannel> {
-    try {
-      await dbConnect()
-
-      const channel = await Channel.findById(guildId).lean()
-
-      return channel
-    } catch (error) {
-      throw new DatabaseError(
-        'ChannelRepository.read() error: ' + error.message,
-      )
-    }
+  public read(guildId: string): Promise<IChannel> {
+    return Channel.findById(guildId).lean()
   }
 
-  public async update(
+  public update(
     guildId: string,
     newWatchList?: string[],
     newTextChannel?: string,
   ): Promise<IChannel> {
-    try {
-      await dbConnect()
-
-      const updatedChannel = await Channel.findByIdAndUpdate(
-        guildId,
-        {
-          ...(newTextChannel && { textChannel: newTextChannel }),
-          ...(newWatchList && { watchList: newWatchList }),
-          lastUpdatedAt: Date.now(),
-        },
-        { new: true },
-      )
-
-      return updatedChannel
-    } catch (error) {
-      throw new DatabaseError(
-        'ChannelRepository.update() error: ' + error.message,
-      )
-    }
+    return Channel.findByIdAndUpdate(
+      guildId,
+      {
+        ...(newTextChannel && { textChannel: newTextChannel }),
+        ...(newWatchList && { watchList: newWatchList }),
+        lastUpdatedAt: Date.now(),
+      },
+      { new: true },
+    )
   }
 
-  public async findAll(): Promise<IChannel[]> {
-    try {
-      await dbConnect()
-
-      const channels = await Channel.find({}).lean()
-
-      return channels
-    } catch (error) {
-      throw new DatabaseError(
-        'ChannelRepository.findAll() error: ' + error.message,
-      )
-    }
+  public findAll(): Promise<IChannel[]> {
+    return Channel.find({}).lean()
   }
 
-  public async delete(guildId: string): Promise<IChannel> {
-    try {
-      await dbConnect()
-
-      const deletedChannel = await Channel.findByIdAndDelete(guildId)
-
-      return deletedChannel
-    } catch (error) {
-      throw new DatabaseError(
-        'ChannelRepository.delete() error: ' + error.message,
-      )
-    }
+  public delete(guildId: string): Promise<IChannel> {
+    return Channel.findByIdAndDelete(guildId)
   }
 }

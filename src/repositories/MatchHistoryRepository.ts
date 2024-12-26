@@ -1,74 +1,46 @@
 import { Service } from 'typedi'
-import { DatabaseError } from '../errors/DatabaseError'
-import MatchHistory, { IMatchHistory } from '../models/matchHistory.model'
-import { dbConnect } from '../mongoose'
+import MatchHistory, { IMatchHistory } from '../models/MatchHistory'
+
+const MAXIMUM_DURATION = 1000 * 60 * 60 * 24 * 3 // 최대 조회 기간 = 3일
+const MAXIMUM_COUNT = 10 // 최대 조회 개수 = 10개
+
+interface CreateMatchHistoryParams {
+  riotPuuid: string
+  matchId: string
+  assists: number
+  championName: string
+  deaths: number
+  gameEndTimestamp: number
+  gameType: string
+  kills: number
+  position: string
+  totalMinionsKilled: number
+  visionScore: number
+  win: boolean
+}
 
 @Service()
-export default class MatchHistoryRepository {
-  public async create(matchHistory: {
-    riotPuuid: string
-    matchId: string
-    assists: number
-    championName: string
-    deaths: number
-    gameEndTimestamp: number
-    gameType: string
-    kills: number
-    position: string
-    totalMinionsKilled: number
-    visionScore: number
-    win: boolean
-  }): Promise<IMatchHistory> {
-    try {
-      await dbConnect()
-
-      const createdMatchHistory = await MatchHistory.create(matchHistory)
-
-      return createdMatchHistory
-    } catch (error) {
-      throw new DatabaseError(
-        'MatchHistoryRepository.create() error: ' + error.message,
-      )
-    }
-  }
-
-  public async read(riotPuuid: string): Promise<IMatchHistory[]> {
-    try {
-      await dbConnect()
-
-      const matchHistories = await MatchHistory.find({
-        riotPuuid,
-        gameEndTimestamp: { $gte: Date.now() - 1000 * 60 * 60 * 24 * 1 },
-      })
-        .limit(15)
-        .sort({ gameEndTimestamp: -1 })
-        .lean()
-
-      return matchHistories
-    } catch (error) {
-      throw new DatabaseError(
-        'MatchHistoryRepository.read() error: ' + error.message,
-      )
-    }
-  }
-
-  public async readOne(
-    riotPuuid: string,
-    matchId: string,
+export class MatchHistoryRepository {
+  public create(
+    matchHistory: CreateMatchHistoryParams,
   ): Promise<IMatchHistory> {
-    try {
-      await dbConnect()
+    return MatchHistory.create(matchHistory)
+  }
 
-      const matchHistory = await MatchHistory.findOne({
-        riotPuuid,
-        matchId,
-      }).lean()
+  public read(riotPuuid: string): Promise<IMatchHistory[]> {
+    return MatchHistory.find({
+      riotPuuid,
+      gameEndTimestamp: { $gte: Date.now() - MAXIMUM_DURATION },
+    })
+      .limit(MAXIMUM_COUNT)
+      .sort({ gameEndTimestamp: -1 })
+      .lean()
+  }
 
-      return matchHistory
-    } catch (error) {
-      throw new DatabaseError(
-        'MatchHistoryRepository.readOne() error: ' + error.message,
-      )
-    }
+  public readOne(riotPuuid: string, matchId: string): Promise<IMatchHistory> {
+    return MatchHistory.findOne({
+      riotPuuid,
+      matchId,
+    }).lean()
   }
 }

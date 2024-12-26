@@ -1,0 +1,5 @@
+export * from './ChannelRepository'
+export * from './MatchHistoryRepository'
+export * from './RankStatRepository'
+export * from './ScheduleRepository'
+export * from './SummonerRepository'
