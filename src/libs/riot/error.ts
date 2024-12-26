@@ -4,7 +4,7 @@ export class RiotApiError extends Error {
   constructor(
     message: string,
     public status?: number,
-    public data?: unknown,
+    public data?: RiotErrorDto,
   ) {
     super(message)
     this.name = 'RiotApiError'

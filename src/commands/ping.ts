@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js'
-import { SlashCommand } from '../types/SlashCommand'
+import { SlashCommand } from '../types'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'

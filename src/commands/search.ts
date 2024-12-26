@@ -7,17 +7,13 @@ import {
   ComponentType,
 } from 'discord.js'
 import Container from 'typedi'
+import { SlashCommand } from '../types'
+import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { IMatchHistory } from '../models/matchHistory.model'
-import { IRankStat } from '../models/rankStat.model'
-import { ISummoner } from '../models/summoner.model'
-import MatchHistoryService from '../services/MatchHistoryService'
-import RankStatService from '../services/RankStatService'
-import RiotService from '../services/RiotService'
-import SummonerService from '../services/SummonerService'
-import { SlashCommand } from '../types/SlashCommand'
-import { detailedSummonerView } from '../views/DetailedSummonerView'
+import { RiotApiError } from '../libs/riot'
+import { detailedSummonerView } from '../views'
+import { LoLService } from '../services'
 
 export const search: SlashCommand = {
   name: '조회',
@@ -31,40 +27,27 @@ export const search: SlashCommand = {
     },
   ],
   execute: async (interaction) => {
-    let summoner: ISummoner,
-      rankStat: IRankStat,
-      matchHistories: Array<IMatchHistory>,
-      replyEmbed: EmbedBuilder
+    let replyEmbed: EmbedBuilder
 
     try {
-      // define services
-      const riotService = Container.get(RiotService)
-      const summonerService = Container.get(SummonerService)
-      const rankStatService = Container.get(RankStatService)
-      const matchHistoryService = Container.get(MatchHistoryService)
+      const lolService = Container.get(LoLService)
 
       const input = (interaction.options.get('소환사')?.value || '') as string
       const [inputGameName, inputTagLine] = input.split('#')
 
-      const { puuid: riotPuuid } = await riotService.fetchAccount(
-        inputGameName,
-        inputTagLine || 'KR1',
-      )
+      const account = await lolService.getAccount(inputGameName, inputTagLine)
+      const riotPuuid = account.puuid
 
-      summoner = await summonerService.read(riotPuuid)
-      const summonerId = summoner.summonerId
+      const { summonerProfile, rankStats, matchHistories } =
+        await lolService.getSummonerDetails(riotPuuid)
 
-      rankStat = await rankStatService.read(summonerId)
-      matchHistories = await matchHistoryService.read(riotPuuid)
-
-      // views
       replyEmbed = detailedSummonerView.createEmbed({
-        summoner,
-        rankStat,
+        summoner: summonerProfile,
+        rankStat: rankStats,
         matchHistories,
       })
 
-      // interaction button
+      // 상호작용 버튼
       const refreshButton = new ButtonBuilder()
         .setCustomId('refresh')
         .setLabel('전적 갱신하기')
@@ -104,14 +87,16 @@ export const search: SlashCommand = {
           ],
         })
 
-        summoner = await summonerService.refresh(riotPuuid)
-        rankStat = await rankStatService.refresh(summonerId)
-        matchHistories = await matchHistoryService.refresh(riotPuuid)
+        const {
+          refreshedSummonerProfile,
+          refreshedRankStats,
+          refreshedMatchHistories,
+        } = await lolService.refreshSummonerDetails(riotPuuid)
 
         replyEmbed = detailedSummonerView.createEmbed({
-          summoner,
-          rankStat,
-          matchHistories,
+          summoner: refreshedSummonerProfile,
+          rankStat: refreshedRankStats,
+          matchHistories: refreshedMatchHistories,
         })
 
         await userInteraction.editReply({
@@ -120,9 +105,34 @@ export const search: SlashCommand = {
         })
       }
     } catch (error) {
+      if (RiotApiError.isRiotApiError(error)) {
+        if (error.data.status.status_code === 404) {
+          return await interaction.editReply({
+            embeds: [
+              new EmbedBuilder()
+                .setColor(COLORS.embedColor.error)
+                .setDescription(
+                  '해당 소환사를 찾을 수 없습니다.\n소환사명과 태그를 다시 확인해주세요.',
+                ),
+            ],
+          })
+        }
+
+        return await interaction.editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor(COLORS.embedColor.error)
+              .setDescription(
+                'RIOT API 와 통신 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.',
+              ),
+          ],
+        })
+      }
+
       if (error instanceof CustomError) {
         return await interaction.editReply({
           embeds: [error.createErrorEmbed()],
+          components: [],
         })
       }
 
@@ -139,6 +149,7 @@ export const search: SlashCommand = {
 
       return await interaction.editReply({
         embeds: [new UnexpectedError(error.message).createErrorEmbed()],
+        components: [],
       })
     }
   },

@@ -1,11 +1,11 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js'
 import Container from 'typedi'
+
+import { ChannelService, LoLService } from '../services'
 import { COLORS } from '../constants/colors'
+import { SlashCommand } from '../types'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import ChannelService from '../services/ChannelService'
-import RiotService from '../services/RiotService'
-import { SlashCommand } from '../types/SlashCommand'
 
 export const register: SlashCommand = {
   name: '등록',
@@ -20,8 +20,7 @@ export const register: SlashCommand = {
   ],
   execute: async (interaction) => {
     try {
-      // define services
-      const riotService = Container.get(RiotService)
+      const lolService = Container.get(LoLService)
       const channelService = Container.get(ChannelService)
 
       const input = (interaction.options.get('소환사')?.value || '') as string
@@ -34,7 +33,7 @@ export const register: SlashCommand = {
         puuid: riotPuuid,
         gameName,
         tagLine,
-      } = await riotService.fetchAccount(inputGameName, inputTagLine || 'KR1')
+      } = await lolService.getAccount(inputGameName, inputTagLine)
 
       await channelService.addToWatchList(guildId, channelId, riotPuuid)
 

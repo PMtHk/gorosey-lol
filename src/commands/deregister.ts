@@ -1,26 +1,23 @@
 import {
+  ActionRowBuilder,
+  ComponentType,
   EmbedBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  ActionRowBuilder,
-  ComponentType,
 } from 'discord.js'
 import Container from 'typedi'
+import { ChannelService, LoLService } from '../services'
+import { SlashCommand } from '../types'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { ISummoner } from '../models/summoner.model'
-import ChannelService from '../services/ChannelService'
-import SummonerService from '../services/SummonerService'
-import { SlashCommand } from '../types/SlashCommand'
 
 export const deregister: SlashCommand = {
   name: '해제',
   description: '특정 소환사를 워치리스트에서 제거할 수 있어요.',
   execute: async (interaction) => {
     try {
-      // define services
-      const summonerService = Container.get(SummonerService)
+      const lolService = Container.get(LoLService)
       const channelService = Container.get(ChannelService)
 
       const guildId = interaction.guildId
@@ -42,30 +39,32 @@ export const deregister: SlashCommand = {
         .setColor(COLORS.embedColor.primary)
         .setDescription('워치리스트에서 제거할 소환사를 선택해주세요.')
 
-      const selectMenu = new StringSelectMenuBuilder()
+      const selectMenuForDeregister = new StringSelectMenuBuilder()
         .setCustomId(interaction.id)
         .setPlaceholder('소환사를 선택해주세요.')
         .setMinValues(1)
         .setMaxValues(1)
 
-      for await (const puuid of watchList) {
-        const summoner: ISummoner = await summonerService.read(puuid)
+      const summonerProfiles = await Promise.all(
+        watchList.map((puuid) => lolService.getSummonerProfile(puuid)),
+      )
 
-        selectMenu.addOptions(
+      summonerProfiles.forEach((summonerProfile) => {
+        selectMenuForDeregister.addOptions(
           new StringSelectMenuOptionBuilder()
-            .setLabel(`${summoner.gameName}#${summoner.tagLine}`)
-            .setValue(summoner._id) // riotPuuid
+            .setLabel(`${summonerProfile.gameName}#${summonerProfile.tagLine}`)
+            .setValue(summonerProfile._id)
             .setDescription(
-              `워치리스트에서 ${summoner.gameName}#${summoner.tagLine} 님을 제거해요.`,
+              `워치리스트에서 ${summonerProfile.gameName}#${summonerProfile.tagLine} 님을 제거해요.`,
             ),
         )
-      }
+      })
 
       await interaction.editReply({
         embeds: [descriptionEmbed],
         components: [
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            selectMenu,
+            selectMenuForDeregister,
           ),
         ],
       })
@@ -79,7 +78,6 @@ export const deregister: SlashCommand = {
 
       // remove selected summoner from watchlist
       const targetRiotPuuid = userInteractions.values[0]
-
       await channelService.removeFromWatchList(guildId, targetRiotPuuid)
 
       await userInteractions.update({

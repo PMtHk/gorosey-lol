@@ -1,6 +1,6 @@
 import { Interaction } from 'discord.js'
 import { commands } from '../commands'
-import { SlashCommand } from '../types/SlashCommand'
+import { SlashCommand } from '../types'
 
 export async function interactionCreateListener(interaction: Interaction) {
   try {
@@ -17,6 +17,7 @@ export async function interactionCreateListener(interaction: Interaction) {
     }
 
     await interaction.deferReply()
+
     command.execute(interaction)
   } catch (error) {
     console.log('[InteractionCreate] ', error)

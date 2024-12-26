@@ -240,6 +240,11 @@ export type MatchesDto = string[]
 // in games
 export type QueueType = 'RANKED_SOLO_5x5' | 'RANKED_FLEX_SR'
 
+export const Queue: Record<QueueType, number> = {
+  RANKED_SOLO_5x5: 420,
+  RANKED_FLEX_SR: 440,
+} as const
+
 export type Lane = 'TOP' | 'JUNGLE' | 'MIDDLE' | 'BOTTOM' | 'UTILITY' | 'ANY'
 
 export type Tier =

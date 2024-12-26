@@ -6,22 +6,19 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
 } from 'discord.js'
+import Container from 'typedi'
+import { ChannelService } from '../services'
 import { COLORS } from '../constants/colors'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { SlashCommand } from '../types/SlashCommand'
-import ChannelRepository from '../repositories/ChannelRepository'
-import ChannelService from '../services/ChannelService'
+import { SlashCommand } from '../types'
 
 export const changeChannel: SlashCommand = {
   name: '채널변경',
   description: '워치리스트 알림 채널을 변경할 수 있어요.',
   execute: async (interaction) => {
     try {
-      // define services
-
-      const channelRepository = new ChannelRepository()
-      const channelService = new ChannelService(channelRepository)
+      const channelService = Container.get(ChannelService)
 
       const guildId = interaction.guildId
       const textChannels = interaction.guild.channels.cache
@@ -33,19 +30,18 @@ export const changeChannel: SlashCommand = {
           }
         })
 
-      // create view
       const descriptionEmbed = new EmbedBuilder()
         .setColor(COLORS.embedColor.primary)
         .setDescription('워치리스트 알림을 받을 채널을 선택해주세요.')
 
-      const selectMenu = new StringSelectMenuBuilder()
+      const channelSelectMenu = new StringSelectMenuBuilder()
         .setCustomId('change_channel')
         .setPlaceholder('채널을 선택해주세요.')
         .setMinValues(1)
         .setMaxValues(1)
 
-      for (const channel of textChannels) {
-        selectMenu.addOptions(
+      textChannels.forEach((channel) => {
+        channelSelectMenu.addOptions(
           new StringSelectMenuOptionBuilder()
             .setLabel(channel.name)
             .setValue(channel.id)
@@ -53,13 +49,13 @@ export const changeChannel: SlashCommand = {
               `워치리스트 알림을 \`${channel.name}\` 채널로 보낼게요.`,
             ),
         )
-      }
+      })
 
       await interaction.editReply({
         embeds: [descriptionEmbed],
         components: [
           new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            selectMenu,
+            channelSelectMenu,
           ),
         ],
       })

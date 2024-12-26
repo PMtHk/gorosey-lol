@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import express, { Request, Response, NextFunction } from 'express'
 import { initBot } from './bot'
+import { dbConnect } from './libs/mongoose'
 
 const PORT = parseInt(process.env.PORT) || 8000
 
@@ -54,6 +55,10 @@ function startServer(port: number = PORT) {
 
   try {
     app.listen(port, () => {
+      dbConnect().catch((error) => {
+        console.error('[MONGOOSE] 데이터베이스 연결 중 문제가 발생했습니다.')
+        console.error(error)
+      })
       initBot()
     })
   } catch (e) {

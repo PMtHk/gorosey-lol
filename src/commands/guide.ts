@@ -1,7 +1,7 @@
 import { commands } from '.'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { SlashCommand } from '../types/SlashCommand'
+import { SlashCommand } from '../types'
 
 export const guide: SlashCommand = {
   name: '도움말',

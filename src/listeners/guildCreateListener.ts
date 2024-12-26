@@ -1,11 +1,10 @@
 import { Channel, ChannelType, Guild } from 'discord.js'
-import ChannelService from '../services/ChannelService'
 import Container from 'typedi'
-import ScheduleService from '../services/schedule.service'
+
+import { ChannelService } from '../services/ChannelService'
 
 export async function guildCreateListener(guild: Guild) {
   const channelService = Container.get(ChannelService)
-  const scheduleService = Container.get(ScheduleService)
 
   try {
     const isTextChannel = (channel: Channel) =>
@@ -20,7 +19,7 @@ export async function guildCreateListener(guild: Guild) {
 
     await Promise.all([
       channelService.createChannel(guild.id, defaultTextChannel.id),
-      scheduleService.createSchedules([{ guildId: guild.id, time: '0' }]),
+      channelService.createSchedules([{ guildId: guild.id, time: '0' }]),
     ])
   } catch (error) {
     console.error('[GuildCreate] ', error)

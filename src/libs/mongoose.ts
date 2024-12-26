@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { DatabaseError } from './errors/DatabaseError'
+import { DatabaseError } from '../errors/DatabaseError'
 import * as dotenv from 'dotenv'
 
 dotenv.config()

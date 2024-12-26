@@ -5,13 +5,12 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
 } from 'discord.js'
+import Container from 'typedi'
+import { ChannelService } from '../services'
 import { COLORS } from '../constants/colors'
+import { SlashCommand } from '../types'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import { SlashCommand } from '../types/SlashCommand'
-import { dbConnect } from '../mongoose'
-import Container from 'typedi'
-import ScheduleService from '../services/schedule.service'
 
 const MINIMUM_TIME_SELECT = 1
 const MAXIMUM_TIME_SELECT = 3
@@ -21,10 +20,7 @@ export const changeTime: SlashCommand = {
   description: '워치리스트 알림 시간을 변경할 수 있어요.',
   execute: async (interaction) => {
     try {
-      await dbConnect()
-
-      // define services
-      const scheduleService = Container.get(ScheduleService)
+      const channelService = Container.get(ChannelService)
 
       const { guildId } = interaction
 
@@ -74,10 +70,10 @@ export const changeTime: SlashCommand = {
 
       // update schedule
       // 1. 기존의 해당 guild의 schedule을 모두 삭제
-      await scheduleService.deleteSchedules(guildId)
+      await channelService.deleteSchedules(guildId)
 
       // 2. 새로운 시간을 등록
-      await scheduleService.createSchedules([
+      await channelService.createSchedules([
         ...selectedTimes.map((time) => ({
           guildId,
           time: time.toString(),

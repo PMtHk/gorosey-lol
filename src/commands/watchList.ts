@@ -1,23 +1,19 @@
 import { EmbedBuilder } from 'discord.js'
 import Container from 'typedi'
+import { ChannelService, LoLService } from '../services'
+import { basicSummonerView } from '../views'
 import { COLORS } from '../constants/colors'
+import { SlashCommand } from '../types'
 import { CustomError } from '../errors/CustomError'
 import { UnexpectedError } from '../errors/UnexpectedError'
-import ChannelService from '../services/ChannelService'
-import RankStatService from '../services/RankStatService'
-import SummonerService from '../services/SummonerService'
-import { SlashCommand } from '../types/SlashCommand'
-import { basicSummonerView } from '../views/BasicSummonerView'
 
 export const watchList: SlashCommand = {
   name: '워치리스트',
   description: '이 채널의 워치리스트를 조회해요.',
   execute: async (interaction) => {
     try {
-      // define services
       const channelService = Container.get(ChannelService)
-      const summonerService = Container.get(SummonerService)
-      const rankStatService = Container.get(RankStatService)
+      const lolService = Container.get(LoLService)
 
       const guildId = interaction.guildId
       const guildName = interaction.guild?.name
@@ -34,20 +30,17 @@ export const watchList: SlashCommand = {
         })
       }
 
-      const embeds = []
+      const embeds = await Promise.all(
+        puuids.map(async (puuid) => {
+          const summoner = await lolService.getSummonerProfile(puuid)
+          const rankStat = await lolService.getSummonerRankStats(puuid)
 
-      for await (const puuid of puuids) {
-        const summoner = await summonerService.read(puuid)
-        const summonerId = summoner.summonerId
-        const rankStat = await rankStatService.read(summonerId)
-
-        const embed = basicSummonerView.createEmbed({
-          summoner,
-          rankStat,
-        })
-
-        embeds.push(embed)
-      }
+          return basicSummonerView.createEmbed({
+            summoner,
+            rankStat,
+          })
+        }),
+      )
 
       const descriptionEmbed = new EmbedBuilder()
         .setColor(COLORS.embedColor.success)
