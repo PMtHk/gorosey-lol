@@ -24,8 +24,9 @@ export class LoLService {
 
   // 통합 (소환사, 랭크, 전적) 조회
   public async getSummonerDetails(riotPuuid: string) {
-    const [summonerProfile, rankStats, matchHistories] = await Promise.all([
-      this.getSummonerProfile(riotPuuid),
+    console.log('getSummonerDetails')
+    const summonerProfile = await this.getSummonerProfile(riotPuuid)
+    const [rankStats, matchHistories] = await Promise.all([
       this.getSummonerRankStats(riotPuuid),
       this.getMatchHistories(riotPuuid),
     ])
@@ -53,6 +54,7 @@ export class LoLService {
 
   // 소환사 관련
   public async getSummonerProfile(riotPuuid: string) {
+    console.log('getSummonerProfile')
     const summonerProfile = await this.summonerRepo.read(riotPuuid)
     if (!summonerProfile) {
       const fetchedSummonerProfile = await this.fetchSummonerProfile(riotPuuid)
