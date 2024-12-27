@@ -1,8 +1,8 @@
 import { ColorResolvable, EmbedBuilder } from 'discord.js'
 
 import { PATCH_VERSION } from '../constants/leagueoflegends'
-import { tierInfos } from '../constants/rank'
-import { IRankStat } from '../models/RankStat'
+import { tierInfos } from '../constants/leagueoflegends'
+import { IRankStat } from '../models'
 import { elapsedTime } from '../utils/elapsedTime'
 import { SummonerView, SummonerViewDto } from './SummonerView'
 

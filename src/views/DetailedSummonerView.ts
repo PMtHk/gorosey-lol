@@ -1,5 +1,5 @@
-import { champions } from '../constants/champions'
-import { IMatchHistory } from '../models/MatchHistory'
+import { champions } from '../constants/leagueoflegends'
+import { IMatchHistory } from '../models'
 import { elapsedTime } from '../utils/elapsedTime'
 import { basicSummonerView } from './BasicSummonerView'
 import { SummonerView, SummonerViewDto } from './SummonerView'
