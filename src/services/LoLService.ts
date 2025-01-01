@@ -24,10 +24,11 @@ export class LoLService {
 
   // 통합 (소환사, 랭크, 전적) 조회
   public async getSummonerDetails(riotPuuid: string) {
-    console.log('getSummonerDetails')
     const summonerProfile = await this.getSummonerProfile(riotPuuid)
+    const summonerId = summonerProfile.summonerId
+
     const [rankStats, matchHistories] = await Promise.all([
-      this.getSummonerRankStats(riotPuuid),
+      this.getSummonerRankStats(summonerId),
       this.getMatchHistories(riotPuuid),
     ])
 
@@ -35,13 +36,12 @@ export class LoLService {
   }
 
   public async refreshSummonerDetails(riotPuuid: string) {
-    const [
-      refreshedSummonerProfile,
-      refreshedRankStats,
-      refreshedMatchHistories,
-    ] = await Promise.all([
-      this.refreshSummonerProfile(riotPuuid),
-      this.refreshSummonerRankStats(riotPuuid),
+    const refreshedSummonerProfile =
+      await this.refreshSummonerProfile(riotPuuid)
+    const summonerId = refreshedSummonerProfile.summonerId
+
+    const [refreshedRankStats, refreshedMatchHistories] = await Promise.all([
+      this.refreshSummonerRankStats(summonerId),
       this.refreshMatchHistories(riotPuuid),
     ])
 
@@ -54,7 +54,6 @@ export class LoLService {
 
   // 소환사 관련
   public async getSummonerProfile(riotPuuid: string) {
-    console.log('getSummonerProfile')
     const summonerProfile = await this.summonerRepo.read(riotPuuid)
     if (!summonerProfile) {
       const fetchedSummonerProfile = await this.fetchSummonerProfile(riotPuuid)
@@ -70,9 +69,7 @@ export class LoLService {
   }
 
   // 랭크 관련
-  public async getSummonerRankStats(riotPuuid: string) {
-    const summonerId = await this.getSummonerId(riotPuuid)
-
+  public async getSummonerRankStats(summonerId: string) {
     const rankStats = await this.rankStatRepo.read(summonerId)
     if (!rankStats) {
       const fetchedRankStats = await this.fetchRankStats(summonerId)
@@ -82,9 +79,7 @@ export class LoLService {
     return rankStats
   }
 
-  public async refreshSummonerRankStats(riotPuuid: string) {
-    const summonerId = await this.getSummonerId(riotPuuid)
-
+  public async refreshSummonerRankStats(summonerId: string) {
     const fetchedRankStats = await this.fetchRankStats(summonerId)
 
     return await this.rankStatRepo.update(fetchedRankStats)
@@ -108,11 +103,6 @@ export class LoLService {
     )
 
     return this.matchHistoryRepo.read(riotPuuid)
-  }
-
-  private async getSummonerId(riotPuuid: string) {
-    const summonerProfile = await this.getSummonerProfile(riotPuuid)
-    return summonerProfile.summonerId
   }
 
   private async fetchSummonerProfile(riotPuuid: string) {
