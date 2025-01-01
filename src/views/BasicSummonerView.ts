@@ -16,7 +16,6 @@ export class BasicSummonerView implements SummonerView {
     const { RANKED_SOLO_5x5, RANKED_FLEX_SR } = rankStat
     const soloTier = RANKED_SOLO_5x5?.tier || 'UNRANKED'
     const flexTier = RANKED_FLEX_SR?.tier || 'UNRANKED'
-
     const tier =
       soloTier !== 'UNRANKED'
         ? soloTier
@@ -33,7 +32,7 @@ export class BasicSummonerView implements SummonerView {
         `https://lol.ps/summoner/${encodeURIComponent(`${gameName}_${tagLine}`)}?region=kr`,
       )
       .setThumbnail(
-        `http://ddragon.leagueoflegends.com/cdn/${PATCH_VERSION}/img/profileicon/${profileIconId}.png`,
+        `https://ddragon.leagueoflegends.com/cdn/${PATCH_VERSION}/img/profileicon/${profileIconId}.png`,
       )
       .setDescription('랭크게임 정보를 조회해요!')
       .addFields(
@@ -52,7 +51,7 @@ export class BasicSummonerView implements SummonerView {
       )
       .setFooter({
         text: `${gameName}#${tagLine} | ${elapsedTime(+lastUpdatedAt)}에 갱신됨`,
-        iconURL: `http://ddragon.leagueoflegends.com/cdn/${PATCH_VERSION}/img/profileicon/${profileIconId}.png`,
+        iconURL: `https://ddragon.leagueoflegends.com/cdn/${PATCH_VERSION}/img/profileicon/${profileIconId}.png`,
       })
   }
 

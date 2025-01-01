@@ -34,6 +34,7 @@ export class WatchService {
     cron.schedule(
       '0 * * * *', // every hour
       async (now) => {
+        this.log("WatchService's cron job started")
         await this.processSchedules(now)
       },
       {
@@ -65,6 +66,13 @@ export class WatchService {
         return
       }
 
+      const targetTextChannel = await this.fetchTextChannel(textChannel)
+      const targetTextChannelName = targetTextChannel.name
+
+      this.log(
+        `Sending watchlist to ${targetTextChannelName} | ${watchList.length} summoners`,
+      )
+
       const embeds = await Promise.all(
         watchList.map(async (riotPuuid) => {
           const details =
@@ -77,7 +85,6 @@ export class WatchService {
         }),
       )
 
-      const targetTextChannel = await this.fetchTextChannel(textChannel)
       await targetTextChannel.send({ embeds })
     } catch (error) {
       this.handleErrors(error)
@@ -101,5 +108,13 @@ export class WatchService {
 
   private handleErrors(error: Error) {
     console.error(error)
+  }
+
+  private log(message: string) {
+    const koTime = new Date().toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+    })
+
+    console.log(`[${koTime}] ${message}`)
   }
 }
