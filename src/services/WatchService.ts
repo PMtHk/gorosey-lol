@@ -1,4 +1,4 @@
-import { Client, TextChannel } from 'discord.js'
+import { Client, DiscordAPIError, TextChannel } from 'discord.js'
 import { Service } from 'typedi'
 import cron from 'node-cron'
 
@@ -8,7 +8,8 @@ import { detailedSummonerView } from '../views'
 import { ISchedulePopulated } from '../models'
 
 interface ChannelInfo {
-  textChannel: string
+  guildId: string
+  textChannelId: string
   watchList: string[]
 }
 
@@ -60,23 +61,20 @@ export class WatchService {
   }
 
   private async sendWatchList(channelInfo: ChannelInfo) {
+    const { guildId, textChannelId, watchList } = channelInfo
+    if (!this.isValidChannelInfo(channelInfo)) {
+      return
+    }
+
     try {
-      const { textChannel, watchList } = channelInfo
-      if (!this.isValidChannelInfo(channelInfo)) {
-        return
-      }
-
-      const targetTextChannel = await this.fetchTextChannel(textChannel)
+      const targetTextChannel = await this.fetchTextChannel(textChannelId)
       const targetTextChannelName = targetTextChannel.name
-
-      this.log(
-        `Sending watchlist to ${targetTextChannelName} | ${watchList.length} summoners`,
-      )
 
       const embeds = await Promise.all(
         watchList.map(async (riotPuuid) => {
           const details =
             await this.lolService.refreshSummonerDetails(riotPuuid)
+
           return detailedSummonerView.createEmbed({
             summoner: details.refreshedSummonerProfile,
             rankStat: details.refreshedRankStats,
@@ -86,8 +84,12 @@ export class WatchService {
       )
 
       await targetTextChannel.send({ embeds })
+
+      this.log(
+        `send watchlist to ${targetTextChannelName} | ${watchList.length} summoners`,
+      )
     } catch (error) {
-      this.handleErrors(error)
+      this.handleErrors(error, guildId)
     }
   }
 
@@ -95,19 +97,31 @@ export class WatchService {
     return (await this.client.channels.fetch(textChannelId)) as TextChannel
   }
 
-  private isValidChannelInfo({ textChannel, watchList }: ChannelInfo) {
-    return textChannel && watchList.length > 0
+  private isValidChannelInfo({ textChannelId, watchList }: ChannelInfo) {
+    return textChannelId && watchList.length > 0
   }
 
   private extractChannelInfo(schedule: ISchedulePopulated) {
     return {
-      textChannel: schedule.guildId?.textChannel,
+      guildId: schedule.guildId?._id,
+      textChannelId: schedule.guildId?.textChannel,
       watchList: schedule.guildId?.watchList,
     }
   }
 
-  private handleErrors(error: Error) {
-    console.error(error)
+  private handleErrors(error: Error, guildId: string) {
+    const discordError = error as DiscordAPIError
+    const PERMISSION_ERROR_CODES = [
+      10003, // Unknown channel
+      50001, // Missing Access
+      50013, // Missing Permissions
+    ]
+
+    if (PERMISSION_ERROR_CODES.includes(discordError.code as number)) {
+      return this.channelService.deleteChannel(guildId)
+    }
+
+    console.error('sendWatchList error: ', error)
   }
 
   private log(message: string) {
