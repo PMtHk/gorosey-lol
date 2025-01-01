@@ -14,6 +14,8 @@ export class RiotService {
 
   private readonly asia = riotClientFactory.getClient('asia')
 
+  // 1000 requests every 1 minutes
+  // 16.67 requests every 1 seconds
   public fetchAccount(
     gameName: string,
     tagLine: string = 'KR1',
@@ -23,20 +25,28 @@ export class RiotService {
     )
   }
 
+  // 1000 requests every 1 minutes
+  // 16.67 requests every 1 seconds
   public fetchAccountByPuuid(riotPuuid: string): Promise<AccountDto> {
     return this.asia.get<AccountDto>(
       `/riot/account/v1/accounts/by-puuid/${riotPuuid}`,
     )
   }
 
+  // 1600 requests every 1 minutes
+  // 26.67 requests every 1 seconds
   public fetchSummoner(riotPuuid: string): Promise<SummonerDto> {
     return this.kr.get(`/lol/summoner/v4/summoners/by-puuid/${riotPuuid}`)
   }
 
+  // 100 requests every 1 minutes
+  // 1.67 requests every 1 seconds
   public fetchLeagueEntry(summonerId: string): Promise<Array<LeagueEntryDto>> {
     return this.kr.get(`/lol/league/v4/entries/by-summoner/${summonerId}`)
   }
 
+  // 2000 requests every 10 seconds
+  // 200 requests every 1 seconds
   public fetchMatches(
     riotPuuid: string,
     options?: {
@@ -63,9 +73,8 @@ export class RiotService {
     )
   }
 
+  // 2000 requests every 10 seconds
   public fetchMatch(matchId: string): Promise<MatchDto> {
     return this.asia.get<MatchDto>(`/lol/match/v5/matches/${matchId}`)
   }
 }
-
-export const riotService = new RiotService()

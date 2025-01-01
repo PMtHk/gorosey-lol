@@ -9,7 +9,12 @@ export class RiotClient {
   constructor(
     protected readonly baseURL: string,
     apiKey: string,
-    private readonly rateLimiter: RateLimiter,
+    private readonly rateLimiters: {
+      getAccountLimiter: () => RateLimiter
+      getSummonerLimiter: () => RateLimiter
+      getLeagueLimiter: () => RateLimiter
+      getMatchLimiter: () => RateLimiter
+    },
   ) {
     this.http = new HttpClient({
       baseURL,
@@ -23,10 +28,21 @@ export class RiotClient {
     get: <T>(url: string) => this.http.get<T | RiotErrorDto>(url),
   } as const
 
-  private async request<T>(method: 'get', url: string) {
-    return this.rateLimiter.execute(async () => {
-      const response = await this.requestHandlers[method](url)
+  private getRateLimiter(path: string): RateLimiter {
+    if (path.includes('/riot/account/'))
+      return this.rateLimiters.getAccountLimiter()
+    if (path.includes('/lol/summoner/'))
+      return this.rateLimiters.getSummonerLimiter()
+    if (path.includes('/lol/league/'))
+      return this.rateLimiters.getLeagueLimiter()
+    if (path.includes('/lol/match/')) return this.rateLimiters.getMatchLimiter()
+    throw new Error(`Unknown API path: ${path}`)
+  }
 
+  private async request<T>(method: 'get', path: string) {
+    const rateLimiter = this.getRateLimiter(path)
+    return rateLimiter.execute(async () => {
+      const response = await this.requestHandlers[method](path)
       if (isRiotErrorDto(response)) {
         throw new RiotApiError(
           response.status.message,
@@ -34,12 +50,11 @@ export class RiotClient {
           response,
         )
       }
-
       return response as T
     })
   }
 
-  public async get<T>(url: string) {
-    return this.request<T>('get', url)
+  public async get<T>(path: string) {
+    return this.request<T>('get', path)
   }
 }

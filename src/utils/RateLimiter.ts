@@ -34,26 +34,29 @@ export class RateLimiter {
   }
 
   private async processQueue() {
-    if (this.isProcessingQueue) return
+    if (this.isProcessingQueue) {
+      return
+    }
     this.isProcessingQueue = true
 
-    while (this.requestQueue.length > 0) {
-      this.gc()
+    try {
+      while (this.requestQueue.length > 0) {
+        this.gc()
 
-      if (this.timestamps.length < this.throttleLimit) {
-        const request = this.requestQueue.shift()
-        if (request) {
-          this.timestamps.push(Date.now())
-          await request()
+        if (this.timestamps.length < this.throttleLimit) {
+          const request = this.requestQueue.shift()
+          if (request) {
+            this.timestamps.push(Date.now())
+            await request()
+          }
         }
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.throttleDuration / this.throttleLimit),
+        )
       }
-
-      await new Promise((resolve) =>
-        setTimeout(resolve, this.throttleDuration / this.throttleLimit),
-      )
+    } finally {
+      this.isProcessingQueue = false
     }
-
-    this.isProcessingQueue = false
   }
 
   public async execute<T>(request: () => Promise<T>) {
@@ -61,12 +64,10 @@ export class RateLimiter {
 
     if (shouldThrottle && this.runningMode === RateLimiterMode.NORMAL) {
       this.runningMode = RateLimiterMode.THROTTLE
-      console.log('Throttling...')
     }
 
     if (!shouldThrottle && this.runningMode === RateLimiterMode.THROTTLE) {
       this.runningMode = RateLimiterMode.NORMAL
-      console.log('Throttle released')
     }
 
     if (this.runningMode === RateLimiterMode.THROTTLE) {
