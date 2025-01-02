@@ -33,10 +33,13 @@ export class WatchService {
     }
 
     cron.schedule(
-      '25 * * * *', // every hour
+      '0 * * * *', // every hour
       async (now) => {
         this.log("WatchService's cron job started")
+
         await this.processSchedules(now)
+
+        this.log("WatchService's cron job finished")
       },
       {
         scheduled: true,

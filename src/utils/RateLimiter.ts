@@ -15,7 +15,7 @@ export class RateLimiter {
   constructor(
     private readonly throttleLimit: number = 500,
     private readonly throttleDuration: number = 10000,
-    private readonly threshold: number = 0.8,
+    private readonly threshold: number = 0.7,
   ) {}
 
   private gc() {

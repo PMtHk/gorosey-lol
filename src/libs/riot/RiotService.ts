@@ -74,6 +74,7 @@ export class RiotService {
   }
 
   // 2000 requests every 10 seconds
+  // 200 requests every 1 seconds
   public fetchMatch(matchId: string): Promise<MatchDto> {
     return this.asia.get<MatchDto>(`/lol/match/v5/matches/${matchId}`)
   }
