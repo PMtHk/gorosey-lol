@@ -1,7 +1,7 @@
 import { HttpError } from './error'
 import { HttpClientConfig, RequestConfig } from './types'
 
-const DEFAULT_TIMEOUT = 10000
+const DEFAULT_TIMEOUT = 30000
 
 export class HttpClient {
   constructor(private config: HttpClientConfig) {

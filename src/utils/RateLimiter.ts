@@ -19,8 +19,9 @@ export class RateLimiter {
   ) {}
 
   private gc() {
+    const now = Date.now()
     this.timestamps = this.timestamps.filter(
-      (timestamp) => Date.now() - timestamp < this.throttleDuration,
+      (timestamp) => now - timestamp < this.throttleDuration,
     )
   }
 
@@ -28,16 +29,17 @@ export class RateLimiter {
     this.gc()
     if (this.runningMode === RateLimiterMode.NORMAL) {
       return this.timestamps.length >= this.throttleLimit
-    } else {
-      return this.timestamps.length > this.throttleLimit * this.threshold
     }
+    return this.timestamps.length > this.throttleLimit * this.threshold
   }
 
   private async processQueue() {
     if (this.isProcessingQueue) {
       return
     }
+
     this.isProcessingQueue = true
+    const interval = this.throttleDuration / this.throttleLimit
 
     try {
       while (this.requestQueue.length > 0) {
@@ -46,41 +48,32 @@ export class RateLimiter {
         if (this.timestamps.length < this.throttleLimit) {
           const request = this.requestQueue.shift()
           if (request) {
-            this.timestamps.push(Date.now())
+            const startTime = Date.now()
+            this.timestamps.push(startTime)
             await request()
           }
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, interval))
         }
-        await new Promise((resolve) =>
-          setTimeout(resolve, this.throttleDuration / this.throttleLimit),
-        )
       }
     } finally {
       this.isProcessingQueue = false
     }
   }
 
-  public async execute<T>(request: () => Promise<T>) {
-    const shouldThrottle = this.shouldThrottle()
-
-    if (shouldThrottle && this.runningMode === RateLimiterMode.NORMAL) {
+  public execute<T>(request: () => Promise<T>): Promise<T> {
+    if (this.shouldThrottle()) {
       this.runningMode = RateLimiterMode.THROTTLE
-    }
-
-    if (!shouldThrottle && this.runningMode === RateLimiterMode.THROTTLE) {
-      this.runningMode = RateLimiterMode.NORMAL
-    }
-
-    if (this.runningMode === RateLimiterMode.THROTTLE) {
       return new Promise<T>((resolve, reject) => {
         this.requestQueue.push(async () => {
           try {
-            resolve(await request())
+            const result = await request()
+            resolve(result)
           } catch (error) {
             reject(error)
           }
         })
-
-        this.processQueue()
+        this.processQueue().catch(reject)
       })
     }
 

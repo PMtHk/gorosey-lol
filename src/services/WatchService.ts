@@ -33,7 +33,7 @@ export class WatchService {
     }
 
     cron.schedule(
-      '0 * * * *', // every hour
+      '25 * * * *', // every hour
       async (now) => {
         this.log("WatchService's cron job started")
         await this.processSchedules(now)
@@ -89,7 +89,7 @@ export class WatchService {
         `send watchlist to ${targetTextChannelName} | ${watchList.length} summoners`,
       )
     } catch (error) {
-      this.handleErrors(error, guildId)
+      await this.handleErrors(error, guildId)
     }
   }
 
