@@ -33,7 +33,8 @@ export const watchList: SlashCommand = {
       const embeds = await Promise.all(
         puuids.map(async (puuid) => {
           const summoner = await lolService.getSummonerProfile(puuid)
-          const rankStat = await lolService.getSummonerRankStats(puuid)
+          const summonerId = summoner.summonerId
+          const rankStat = await lolService.getSummonerRankStats(summonerId)
 
           return basicSummonerView.createEmbed({
             summoner,
