@@ -3,7 +3,7 @@ import Container from 'typedi'
 
 import { commands } from '../commands'
 import { UPDATE_SERVER_COUNT_INTERVAL, koreanBots } from '../libs/koreanbots'
-import { WatchService } from '../services/WatchService'
+import { WatchService } from '../services'
 
 function createSlashCommands(client: Client) {
   return Promise.all(

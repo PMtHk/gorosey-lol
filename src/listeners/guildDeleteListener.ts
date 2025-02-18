@@ -1,7 +1,7 @@
 import { Guild } from 'discord.js'
 import Container from 'typedi'
 
-import { ChannelService } from '../services/ChannelService'
+import { ChannelService } from '../services'
 
 export async function guildDeleteListener(guild: Guild) {
   const channelService = Container.get(ChannelService)

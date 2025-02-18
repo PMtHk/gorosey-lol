@@ -1,7 +1,7 @@
 import { Channel, ChannelType, Guild } from 'discord.js'
 import Container from 'typedi'
 
-import { ChannelService } from '../services/ChannelService'
+import { ChannelService } from '../services'
 
 export async function guildCreateListener(guild: Guild) {
   const channelService = Container.get(ChannelService)

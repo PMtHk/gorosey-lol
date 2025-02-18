@@ -10,7 +10,7 @@ export interface ISummoner {
   lastUpdatedAt: Date
 }
 
-const summonnerSchema = new mongoose.Schema<ISummoner>({
+const summonerSchema = new mongoose.Schema<ISummoner>({
   // 소환사 계정 별로 riot 자체 puuid 부여되므로
   // puuid를 _id로 사용
   _id: { type: String },
@@ -29,7 +29,7 @@ let Summoner = null
 if (mongoose.models.Summoner !== undefined) {
   Summoner = mongoose.models.Summoner
 } else {
-  Summoner = mongoose.model<ISummoner>('Summoner', summonnerSchema)
+  Summoner = mongoose.model<ISummoner>('Summoner', summonerSchema)
 }
 
 export default Summoner
