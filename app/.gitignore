@@ -2,10 +2,13 @@
 /node_modules
 
 # environments
-.env*
+.env.*
 
 # build
 /dist
 
 # ide
 .idea
+
+# DS_Stroe
+.DS_Store

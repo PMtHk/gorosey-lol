@@ -48,6 +48,6 @@
 
 ## 🗒️ 개발 관련
 
-1. [병렬 처리와 RateLimiter 적용기](https://velog.io/@pmthk__/%EA%B3%A0%EB%A1%9C%EC%8B%9C%EB%A1%A4-%EB%B3%91%EB%A0%AC-%EC%B2%98%EB%A6%AC%EC%99%80-RateLimiter-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0)  
+1. [병렬 처리와 RateLimiter 적용기](https://velog.io/@pmthk__/%EB%B3%91%EB%A0%AC-%EC%B2%98%EB%A6%AC%EC%99%80-RateLimiter-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0)  
    성능 개선을 위해 병렬 처리를 도입하고,  
    그 과정에서 Riot API Rate Limit 을 준수하기 위해 RateLimiter 를 만들고 적용했습니다.
