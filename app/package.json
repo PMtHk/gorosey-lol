@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig-build.json",
     "dev": "node --env-file=.env.local --watch -r ts-node/register src/server.ts",
+    "start": "node --env-file=.env dist/server.js",
     "test": "jest",
     "format": "prettier --write . --ignore-path .gitignore",
     "lint": "eslint src/**/*.ts"
