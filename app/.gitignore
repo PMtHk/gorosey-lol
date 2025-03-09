@@ -2,7 +2,8 @@
 /node_modules
 
 # environments
-.env.*
+.env
+.env.local
 
 # build
 /dist
